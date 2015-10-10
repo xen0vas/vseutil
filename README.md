@@ -9,6 +9,6 @@ This executable performs the following
 
 # Create a standalone executable 
 
-python pyinstaller.py --onefile -i <icon_file> vse88x.py
+python pyinstaller.py --onefile vse88x.py
 
 
