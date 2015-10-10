@@ -11,4 +11,10 @@ This executable performs the following
 
 python pyinstaller.py --onefile vse88x.py
 
+### How to run it 
+
+##### **the following execution command will search for the hosts with IP from 192.168.162.10 to 192.168.162.11 and will copy the DAT to the share folder named share 
+
+vse88x.exe -s 192.168.162.10 -t  192.168.162.11  -u EPOLAB\xeno -p Ocdp481! --sf c:\share\7949xdat.exe --df share
+
 
