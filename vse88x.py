@@ -12,7 +12,7 @@ import win32wnet
 import psexec
 
 
-#xenofon 
+#xenofon dddddddd
 
 
 init()
