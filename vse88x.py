@@ -12,9 +12,6 @@ import win32wnet
 import psexec
 
 
-#xenofon dddddddd
-
-
 init()
 
 def main():
