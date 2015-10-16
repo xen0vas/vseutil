@@ -1,3 +1,4 @@
+
 from _winreg import *
 import optparse
 import sys
@@ -8,6 +9,8 @@ import pprint
 from colorama import  *
 import shutil
 import win32wnet
+import psexec
+
 
 
 init()
@@ -91,6 +94,9 @@ def copy_file(ip,user,password,sourcefile,destfile):
 		except:
 			print 'file didnt copied to %s' % destfile
 			raise
+		
+#def fileexecute():
+	
 
 def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 		
@@ -112,13 +118,39 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 				else:
 					results, vname = c.EnumKey(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800")
 					res,val = c.GetStringValue(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
+				
+				splitval = val 
+				valsplit = splitval.split('.')
+				sourcefilesplit = sourcefile.split('\\')
+				DAT = sourcefilesplit[-1]
+				DATval = DAT.split('.')
+				valDAT = ''.join(DATval[0])
+				val2DAT = valDAT.split('x')
+				DAT2val = int(val2DAT[0])
+				valnum = int(valsplit[0])
+				
+				if DAT2val > valnum:
+					try:
+						print "DAT: %s.0000" % DAT2val + " is bigger version"
+						psproject = psexec.PSEXEC(DAT,destfile,username,upass)
+						print "executing new DAT %s" % sourcefile
+						psproject.run(ip)
+					except:
+						raise
+				
 				if (value == "all"):
 					regvalue(vname)
 					
 				else:
-					print  "The %s " % (value) + "is " + Fore.YELLOW +  "%s \n\n" % (val)
-					
-			elif(value != None):
+					print  "current %s " % (value) + "is " + Fore.YELLOW +  "%s \n\n" % (val)
+			elif(value == None and sourcefile != None and destfile != None):
+				try:
+					copy_file(ip,username,upass,sourcefile,destfile)
+				except:
+						print "file didnt copied to destination %s" % destfile
+						
+			elif(value != None and sourcefile == None and destfile == None):
+
 				c = wmi.WMI(computer=ip, user=username, password=upass, namespace="root/default").StdRegProv
 				n,arch = c.GetStringValue(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName="SYSTEM\CurrentControlSet\Control\Session Manager\Environment",sValueName="PROCESSOR_ARCHITECTURE")
 				if(arch == 'x86'):	
