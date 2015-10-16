@@ -51,6 +51,8 @@ def main():
 	#	enumerate(from_host,to_host,tgtuser,tgtpass,value,cidr_hosts)
 	#else:		
 	
+	
+	Xeno
 
 def enumerate(fromh,toh,username,upass,value,cidr_hosts):
 	if (cidr_hosts != None):
