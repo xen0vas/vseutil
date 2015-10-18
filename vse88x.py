@@ -9,8 +9,8 @@ import pprint
 from colorama import  *
 import shutil
 import win32wnet
-import psexec
-
+from impacket import psexec
+import socket
 
 init()
 
@@ -50,8 +50,6 @@ def main():
 	#	enumerate(from_host,to_host,tgtuser,tgtpass,value,cidr_hosts)
 	#else:		
 	
-	
-	Xeno
 
 def enumerate(fromh,toh,username,upass,value,cidr_hosts):
 	if (cidr_hosts != None):
@@ -120,6 +118,15 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 					results, vname = c.EnumKey(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800")
 					res,val = c.GetStringValue(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
 				
+				try:
+					uname=username.split('\\')
+					user=uname[-1]
+					domain=uname[0]
+				except:
+					user=username
+					domain=None
+					raise
+				
 				splitval = val 
 				valsplit = splitval.split('.')
 				sourcefilesplit = sourcefile.split('\\')
@@ -133,9 +140,10 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 				if DAT2val > valnum:
 					try:
 						print "DAT: %s.0000" % DAT2val + " is bigger version"
-						psproject = psexec.PSEXEC(DAT,destfile,username,upass)
+						psproject = psexec.PSEXEC(DAT,destfile,None,None,None,user,upass,domain,None,None,None)
 						print "executing new DAT %s" % sourcefile
 						psproject.run(ip)
+						print ip
 					except:
 						raise
 				
