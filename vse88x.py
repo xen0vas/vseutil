@@ -6,11 +6,23 @@ import platform as winos
 import wmi
 from netaddr import *
 import pprint
-from colorama import  *
+from colorama import *
 import shutil
 import win32wnet
-from impacket import psexec
 import socket
+import time
+from types import *
+import win32api
+import win32com
+import win32service
+import win32serviceutil
+import win32event
+
+RUNNING = win32service.SERVICE_RUNNING
+STARTING = win32service.SERVICE_START_PENDING
+STOPPING = win32service.SERVICE_STOP_PENDING
+STOPPED = win32service.SERVICE_STOPPED
+
 
 init()
 
@@ -37,8 +49,7 @@ def main():
 	sourcefile = options.sourcefile
 	destfile = options.destinationfile
 	
-	
-				
+
 	if (value == None and tgtuser == None and tgtpass == None and from_host == None and to_host == None):
 			if (tgtuser == None or tgtpass == None or cidr_hosts == None):
 						print parser.usage
@@ -49,7 +60,27 @@ def main():
 	#if (value == "all"):
 	#	enumerate(from_host,to_host,tgtuser,tgtpass,value,cidr_hosts)
 	#else:		
-	
+def svcStatus( svc_name, machine=None):
+		return win32serviceutil.QueryServiceStatus( svc_name, machine)[1]	# scvType, svcState, svcControls, err, svcErr, svcCP, svcWH
+
+def svcStop( svc_name, machine=None):
+		status = win32serviceutil.StopService( svc_name, machine)[1]
+		while status == STOPPING:
+			time.sleep(1)
+			status = svcStatus( svc_name, machine)
+		return status
+
+def svcStart( svc_name,svc_arg=None, machine=None):
+		if not svc_arg is None:
+			if type(svc_arg) in StringTypes:
+				#win32service expects a list of string arguments
+				svc_arg = [svc_arg]
+		status = win32serviceutil.StartService( svc_name,svc_arg, machine)[1]
+		status = svcStatus( svc_name, machine)
+		while status == STARTING:
+			win32event.SetEvent(svc_name.hWaitStart)
+			status = svcStatus( svc_name, machine)
+		return status
 
 def enumerate(fromh,toh,username,upass,value,cidr_hosts):
 	if (cidr_hosts != None):
@@ -87,18 +118,13 @@ def copy_file(ip,user,password,sourcefile,destfile):
 		wnet_connect(ip, user, password)
 		try:
 			shutil.copy2(sourcefile,'\\\\' + str(ip) + '\\' + str(destfile) + '\\')
-	
-			print  'file ' + Fore.YELLOW + sourcefile + Fore.WHITE + ' copied to %s' % destfile
-			
+			print  'file ' + Fore.YELLOW + sourcefile + Fore.WHITE + ' copied to %s' % destfile	
 		except:
 			print 'file didnt copied to %s' % destfile
 			raise
 		
-#def fileexecute():
 	
-
 def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
-		
 	if (cidr_hosts != None):
 		iprange = IPNetwork(cidr_hosts)
 	else:
@@ -106,10 +132,10 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 	for ip in iprange:
 		print Fore.WHITE + "\n" + "IP: %s" % ip + "\n\n"
 		try:
-			if (value == 'DATVersion' and sourcefile != None and destfile != None):
+			if (value == 'DATVersion' and sourcefile != None and destfile != None and username != None and upass != None):
 				
-				copy_file(ip,username,upass,sourcefile,destfile)
 				c = wmi.WMI(computer=ip, user=username, password=upass, namespace="root/default").StdRegProv
+				
 				n,arch = c.GetStringValue(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName="SYSTEM\CurrentControlSet\Control\Session Manager\Environment",sValueName="PROCESSOR_ARCHITECTURE")
 				if(arch == 'x86'):	
 					results, vname = c.EnumKey(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800")
@@ -139,12 +165,25 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 				
 				if DAT2val > valnum:
 					try:
+						copy_file(ip,username,upass,sourcefile,destfile)
+						status1 = svcStatus( "McAfee McShield", unicode(ip))
+						status2 = svcStatus( "McAfee Framework Service", unicode(ip))
+						
+						if status1 != STOPPED and status2 != STOPPED:
+							st = svcStop( "McAfee McShield", unicode(ip))
+							st2 = svcStop( "McAfee Framework Service", unicode(ip))
+							
+						if status1 == STOPPED and status2 == STOPPED:
+							arg=None
+							st = svcStart( "McAfee McShield",arg, unicode(ip))	
+							st2 = svcStart( "McAfee Framework Service",arg, unicode(ip))
+						
 						print "DAT: %s.0000" % DAT2val + " is bigger version"
-						psproject = psexec.PSEXEC(DAT,destfile,None,None,None,user,upass,domain,None,None,None)
-						print "executing new DAT %s" % sourcefile
-						psproject.run(ip)
-						print ip
-					except:
+						print "copying new DAT %s" % sourcefile
+						
+						
+					except win32api.error as err :
+						print err
 						raise
 				
 				if (value == "all"):
@@ -158,7 +197,7 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 				except:
 						print "file didnt copied to destination %s" % destfile
 						
-			elif(value != None and sourcefile == None and destfile == None):
+			elif(value != None and sourcefile == None and destfile == None and username != None and upass != None):
 
 				c = wmi.WMI(computer=ip, user=username, password=upass, namespace="root/default").StdRegProv
 				n,arch = c.GetStringValue(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName="SYSTEM\CurrentControlSet\Control\Session Manager\Environment",sValueName="PROCESSOR_ARCHITECTURE")
@@ -174,8 +213,11 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 					print  "The %s " % (value) + "is " + Fore.YELLOW +  "%s \n\n" % (val)
 			else:
 				print 'check registry values or source and destination file to copy'
-		except: 
-			print "Probably host is down or no VSE 8.8.x installed \n\n"
+		#except: 
+		#	print "Probably host is down or no VSE 8.8.x installed \n\n"
+		except win32service.error, (hr, fn, msg):
+        		print "Error starting service: %s" % msg
+					
 	
 def regvalue(val):
 		try:
