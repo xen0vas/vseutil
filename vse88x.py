@@ -64,21 +64,17 @@ def svcStatus( svc_name, machine=None):
 		return win32serviceutil.QueryServiceStatus( svc_name, machine)[1]	# scvType, svcState, svcControls, err, svcErr, svcCP, svcWH
 
 def svcStop( svc_name, machine=None):
-		status = win32serviceutil.StopService( svc_name, machine)[1]
+		status = win32serviceutil.StopServiceWithDeps( svc_name, machine,30)
 		while status == STOPPING:
 			time.sleep(1)
 			status = svcStatus( svc_name, machine)
 		return status
 
-def svcStart( svc_name,svc_arg=None, machine=None):
-		if not svc_arg is None:
-			if type(svc_arg) in StringTypes:
-				#win32service expects a list of string arguments
-				svc_arg = [svc_arg]
-		status = win32serviceutil.StartService( svc_name,svc_arg, machine)[1]
+def svcStart(svc_name,svc_arg, machine=None):
+		status = win32serviceutil.StartService(svc_name,None, machine)
 		status = svcStatus( svc_name, machine)
 		while status == STARTING:
-			win32event.SetEvent(svc_name.hWaitStart)
+			time.sleep(3)
 			status = svcStatus( svc_name, machine)
 		return status
 
@@ -159,24 +155,30 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 				DAT = sourcefilesplit[-1]
 				DATval = DAT.split('.')
 				valDAT = ''.join(DATval[0])
-				val2DAT = valDAT.split('x')
-				DAT2val = int(val2DAT[0])
+				val2DAT = valDAT.split('-')
+				DAT2val = int(val2DAT[1])
 				valnum = int(valsplit[0])
 				
-				if DAT2val > valnum:
+				if DAT2val < valnum:
 					try:
 						copy_file(ip,username,upass,sourcefile,destfile)
-						status1 = svcStatus( "McAfee McShield", unicode(ip))
-						status2 = svcStatus( "McAfee Framework Service", unicode(ip))
+						status1 = svcStatus( "McShield", unicode(ip))
+						status2 = svcStatus( "McAfeeFramework", unicode(ip))
 						
 						if status1 != STOPPED and status2 != STOPPED:
-							st = svcStop( "McAfee McShield", unicode(ip))
-							st2 = svcStop( "McAfee Framework Service", unicode(ip))
+							svcStop( "McShield", unicode(ip))
+							svcStop( "McAfeeFramework", unicode(ip))
 							
+						
+						
+						status1 = svcStatus( "McShield", unicode(ip))
+						status2 = svcStatus( "McAfeeFramework", unicode(ip))
+						
 						if status1 == STOPPED and status2 == STOPPED:
-							arg=None
-							st = svcStart( "McAfee McShield",arg, unicode(ip))	
-							st2 = svcStart( "McAfee Framework Service",arg, unicode(ip))
+							
+							arg="win32service.SERVICE_ALL_ACCESS"
+							svcStart( "McShield",arg, unicode(ip))	
+							svcStart( "McAfeeFramework",arg, unicode(ip))
 						
 						print "DAT: %s.0000" % DAT2val + " is bigger version"
 						print "copying new DAT %s" % sourcefile
