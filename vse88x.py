@@ -116,9 +116,9 @@ def copy_file(ip,user,password,sourcefile,destfile):
 		wnet_connect(ip, user, password)
 		try:
 			shutil.copy2(sourcefile,'\\\\' + str(ip) + '\\' + str(destfile) + '\\')
-			print  'file ' + Fore.YELLOW + sourcefile + Fore.WHITE + ' copied to %s' % destfile	
+			print  'DAT file ' + Fore.YELLOW + sourcefile + Fore.WHITE + ' copied to C:\Program Files\Common Files\McAfee\%s' % destfile
 		except:
-			print 'file didnt copied to %s' % destfile
+			print 'DAT file didnt copied to %s' % destfile
 			raise
 		
 	
@@ -164,23 +164,21 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 				if DAT2val > valnum:				
 						status1 = svcStatus( "McShield", unicode(ip))
 						status2 = svcStatus( "McAfeeFramework", unicode(ip))
-						
+													
 						if status1 != STOPPED and status2 != STOPPED:
 							svcStop( "McShield", unicode(ip))
 							svcStop( "McAfeeFramework", unicode(ip))
-							copy_file(ip,username,upass,sourcefile,destfile)
 							print "DAT: %s.0000" % DAT2val + " is bigger version"
-							print "copying new DAT at C:\Program Files\Common Files\McAfee\%s" % sourcefile
+							copy_file(ip,username,upass,sourcefile,destfile)
 							zipp = zipfile.ZipFile('\\\\' + str(ip) + '\\' + str(destfile) + '\\' + DAT)
 							zipp.extractall('\\\\' + str(ip) + '\\' + str(destfile) + '\\')
-							print "files have been extracted at C:\Program Files\Common Files\McAfee\%s" % destfile
+							print "DAT files have been extracted at C:\Program Files\Common Files\McAfee\%s" % destfile
 		
 					
 						status1 = svcStatus( "McShield", unicode(ip))
 						status2 = svcStatus( "McAfeeFramework", unicode(ip))
 						
 						if status1 == STOPPED and status2 == STOPPED:
-							
 							arg="win32service.SERVICE_ALL_ACCESS"
 							svcStart( "McShield",arg, unicode(ip))	
 							svcStart( "McAfeeFramework",arg, unicode(ip))
@@ -190,10 +188,14 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 						status2 = svcStatus( "McAfeeFramework", unicode(ip))
 						
 						if status1 != STOPPED and status2 != STOPPED:	
-								g = wmi.WMI(computer=ip, user=username, password=upass, namespace="root/default").StdRegProv			
-								if(arch == 'x86'):
+								g = wmi.WMI(computer=ip, user=username, password=upass, namespace="root/default").StdRegProv
+								#g.Registry()	
+								n1,arch1 = g.GetStringValue(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName="SYSTEM\CurrentControlSet\Control\Session Manager\Environment",sValueName="PROCESSOR_ARCHITECTURE")
+								if(arch1 == 'x86'):
+									ress, = g.SetStringValue(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName=r"SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value,sValue=str(DAT2val) + '.0000')
 									res1,val1 = g.GetStringValue(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
 								else:
+									ress, = g.SetStringValue(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName=r"SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value,sValue=str(DAT2val) + '.0000')
 									res1,val1 = g.GetStringValue(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
 								print  "new current %s version " % (value) + "is " + Fore.YELLOW +  "%s \n\n" % (val1)
 								
@@ -224,10 +226,10 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 					print  "The %s " % (value) + "is " + Fore.YELLOW +  "%s \n\n" % (val)
 			else:
 				print 'check registry values or source and destination file to copy'
-		except: 
-			print "Probably host is down or no VSE 8.8.x installed \n\n"
-		#except win32service.error, (hr, fn, msg):
-        #		print "Error starting service: %s" % msg
+		#except: 
+		#	print "Probably host is down or no VSE 8.8.x installed \n\n"
+		except win32service.error, (hr, fn, msg):
+        		print "Error starting service: %s" % msg
 					
 	
 def regvalue(val):
