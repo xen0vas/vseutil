@@ -115,9 +115,9 @@ def copy_file(ip,user,password,sourcefile,destfile):
 		wnet_connect(ip, user, password)
 		try:
 			shutil.copy2(sourcefile,'\\\\' + str(ip) + '\\' + str(destfile) + '\\')
-			print  'DAT file ' + Fore.YELLOW + sourcefile + Fore.WHITE + ' copied to C:\Program Files\Common Files\McAfee\%s' % destfile
+			print  'file ' + Fore.YELLOW + sourcefile + Fore.WHITE + ' copied to C:\Program Files\Common Files\McAfee\%s' % destfile
 		except:
-			print 'DAT file didnt copied to  C:\Program Files\Common Files\McAfee\%s. Check Permissions' % destfile
+			print 'file did not copied to C:\Program Files\Common Files\McAfee\%s. Check Permissions' % destfile
 			
 
 def unzip(DAT,ip,destfile):
@@ -125,7 +125,7 @@ def unzip(DAT,ip,destfile):
 	semaphore.acquire()
 	zipp = zipfile.ZipFile('\\\\' + str(ip) + '\\' + str(destfile) + '\\' + DAT)
 	zipp.extractall('\\\\' + str(ip) + '\\' + str(destfile) + '\\')
-	print "DAT files have been extracted at C:\Program Files\Common Files\McAfee\%s" % destfile
+	print "files have been extracted at C:\Program Files\Common Files\McAfee\%s" % destfile
 	semaphore.release()	
 	
 def deletefiles(ip,destfile,DAT):
@@ -195,7 +195,6 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 							arg="win32service.SERVICE_ALL_ACCESS"
 							svcStart( "McShield",arg, unicode(ip))	
 							svcStart( "McAfeeFramework",arg, unicode(ip))
-						
 						
 						status1 = svcStatus( "McShield", unicode(ip))
 						status2 = svcStatus( "McAfeeFramework", unicode(ip))
