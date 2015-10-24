@@ -1,6 +1,7 @@
 
 from _winreg import *
 import optparse
+import zipfile
 import sys
 import platform as winos
 import wmi
@@ -17,6 +18,7 @@ import win32com
 import win32service
 import win32serviceutil
 import win32event
+
 
 RUNNING = win32service.SERVICE_RUNNING
 STARTING = win32service.SERVICE_START_PENDING
@@ -159,18 +161,23 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 				DAT2val = int(val2DAT[1])
 				valnum = int(valsplit[0])
 				
-				if DAT2val < valnum:
+				if DAT2val > valnum:
 					try:
-						copy_file(ip,username,upass,sourcefile,destfile)
+						
 						status1 = svcStatus( "McShield", unicode(ip))
 						status2 = svcStatus( "McAfeeFramework", unicode(ip))
 						
 						if status1 != STOPPED and status2 != STOPPED:
 							svcStop( "McShield", unicode(ip))
 							svcStop( "McAfeeFramework", unicode(ip))
+							copy_file(ip,username,upass,sourcefile,destfile)
+							print "DAT: %s.0000" % DAT2val + " is bigger version"
+							print "copying new DAT %s" % sourcefile
+							zipp = zipfile.ZipFile('\\\\' + str(ip) + '\\' + str(destfile) + '\\' + DAT)
+							zipp.extractall('\\\\' + str(ip) + '\\' + str(destfile) + '\\')
 							
-						
-						
+		
+					
 						status1 = svcStatus( "McShield", unicode(ip))
 						status2 = svcStatus( "McAfeeFramework", unicode(ip))
 						
@@ -180,8 +187,8 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 							svcStart( "McShield",arg, unicode(ip))	
 							svcStart( "McAfeeFramework",arg, unicode(ip))
 						
-						print "DAT: %s.0000" % DAT2val + " is bigger version"
-						print "copying new DAT %s" % sourcefile
+						
+						
 						
 						
 					except win32api.error as err :
