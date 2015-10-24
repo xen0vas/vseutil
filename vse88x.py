@@ -1,6 +1,7 @@
 
 from _winreg import *
 import optparse
+import os
 import zipfile
 import sys
 import platform as winos
@@ -96,8 +97,8 @@ def enumerate(fromh,toh,username,upass,value,cidr_hosts):
 				print repr(name),
 				count = count + 1
 			CloseKey(t)
-		except WindowsError:
-			raise
+		except:
+			print "there is an error in wmi connection"
 
 def wnet_connect(host, username, password):
 	unc = ''.join(['\\\\', str(host)])
@@ -118,8 +119,8 @@ def copy_file(ip,user,password,sourcefile,destfile):
 			shutil.copy2(sourcefile,'\\\\' + str(ip) + '\\' + str(destfile) + '\\')
 			print  'DAT file ' + Fore.YELLOW + sourcefile + Fore.WHITE + ' copied to C:\Program Files\Common Files\McAfee\%s' % destfile
 		except:
-			print 'DAT file didnt copied to %s' % destfile
-			raise
+			print 'DAT file didnt copied to  C:\Program Files\Common Files\McAfee\%s. Check Permissions' % destfile
+			
 		
 	
 def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
@@ -149,7 +150,7 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 				except:
 					user=username
 					domain=None
-					raise
+					
 				
 				splitval = val 
 				valsplit = splitval.split('.')
@@ -173,7 +174,9 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 							zipp = zipfile.ZipFile('\\\\' + str(ip) + '\\' + str(destfile) + '\\' + DAT)
 							zipp.extractall('\\\\' + str(ip) + '\\' + str(destfile) + '\\')
 							print "DAT files have been extracted at C:\Program Files\Common Files\McAfee\%s" % destfile
-		
+							os.remove('\\\\' + str(ip) + '\\' + str(destfile) + '\\' + DAT)
+							os.remove('\\\\' + str(ip) + '\\' + str(destfile) + '\\' + "legal.txt")
+					
 					
 						status1 = svcStatus( "McShield", unicode(ip))
 						status2 = svcStatus( "McAfeeFramework", unicode(ip))
@@ -189,21 +192,23 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 						
 						if status1 != STOPPED and status2 != STOPPED:	
 								g = wmi.WMI(computer=ip, user=username, password=upass, namespace="root/default").StdRegProv
-								#g.Registry()	
+									
 								n1,arch1 = g.GetStringValue(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName="SYSTEM\CurrentControlSet\Control\Session Manager\Environment",sValueName="PROCESSOR_ARCHITECTURE")
 								if(arch1 == 'x86'):
 									ress, = g.SetStringValue(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName=r"SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value,sValue=str(DAT2val) + '.0000')
-									res1,val1 = g.GetStringValue(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
+									res1,val = g.GetStringValue(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
 								else:
 									ress, = g.SetStringValue(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName=r"SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value,sValue=str(DAT2val) + '.0000')
-									res1,val1 = g.GetStringValue(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
-								print  "new current %s version " % (value) + "is " + Fore.YELLOW +  "%s \n\n" % (val1)
-								
+									res1,val = g.GetStringValue(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
+								print  "new current %s version " % (value) + "is " + Fore.YELLOW +  "%s \n\n" % (val)
+						
+						
 				if (value == "all"):
 					regvalue(vname)
 					
-				else:
+				elif DAT2val <= valnum:
 					print  "current %s " % (value) + "is " + Fore.YELLOW +  "%s \n\n" % (val)
+				
 			elif(value == None and sourcefile != None and destfile != None):
 				try:
 					copy_file(ip,username,upass,sourcefile,destfile)
