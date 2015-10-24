@@ -161,9 +161,7 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 				DAT2val = int(val2DAT[1])
 				valnum = int(valsplit[0])
 				
-				if DAT2val > valnum:
-					try:
-						
+				if DAT2val > valnum:				
 						status1 = svcStatus( "McShield", unicode(ip))
 						status2 = svcStatus( "McAfeeFramework", unicode(ip))
 						
@@ -175,7 +173,7 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 							print "copying new DAT %s" % sourcefile
 							zipp = zipfile.ZipFile('\\\\' + str(ip) + '\\' + str(destfile) + '\\' + DAT)
 							zipp.extractall('\\\\' + str(ip) + '\\' + str(destfile) + '\\')
-							
+							print "files have been extracted at  %s" % destfile
 		
 					
 						status1 = svcStatus( "McShield", unicode(ip))
@@ -188,13 +186,13 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 							svcStart( "McAfeeFramework",arg, unicode(ip))
 						
 						
+						status1 = svcStatus( "McShield", unicode(ip))
+						status2 = svcStatus( "McAfeeFramework", unicode(ip))
 						
-						
-						
-					except win32api.error as err :
-						print err
-						raise
-				
+						if status1 != STOPPED and status2 != STOPPED:						
+								print  "new current %s version " % (value) + "is " + Fore.YELLOW +  "%s \n\n" % (val)
+								
+								
 				if (value == "all"):
 					regvalue(vname)
 					
@@ -222,10 +220,10 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 					print  "The %s " % (value) + "is " + Fore.YELLOW +  "%s \n\n" % (val)
 			else:
 				print 'check registry values or source and destination file to copy'
-		#except: 
-		#	print "Probably host is down or no VSE 8.8.x installed \n\n"
-		except win32service.error, (hr, fn, msg):
-        		print "Error starting service: %s" % msg
+		except: 
+			print "Probably host is down or no VSE 8.8.x installed \n\n"
+		#except win32service.error, (hr, fn, msg):
+        #		print "Error starting service: %s" % msg
 					
 	
 def regvalue(val):
