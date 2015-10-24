@@ -170,10 +170,10 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 							svcStop( "McAfeeFramework", unicode(ip))
 							copy_file(ip,username,upass,sourcefile,destfile)
 							print "DAT: %s.0000" % DAT2val + " is bigger version"
-							print "copying new DAT %s" % sourcefile
+							print "copying new DAT at C:\Program Files\Common Files\McAfee\%s" % sourcefile
 							zipp = zipfile.ZipFile('\\\\' + str(ip) + '\\' + str(destfile) + '\\' + DAT)
 							zipp.extractall('\\\\' + str(ip) + '\\' + str(destfile) + '\\')
-							print "files have been extracted at  %s" % destfile
+							print "files have been extracted at C:\Program Files\Common Files\McAfee\%s" % destfile
 		
 					
 						status1 = svcStatus( "McShield", unicode(ip))
@@ -189,9 +189,13 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 						status1 = svcStatus( "McShield", unicode(ip))
 						status2 = svcStatus( "McAfeeFramework", unicode(ip))
 						
-						if status1 != STOPPED and status2 != STOPPED:						
-								print  "new current %s version " % (value) + "is " + Fore.YELLOW +  "%s \n\n" % (val)
-								
+						if status1 != STOPPED and status2 != STOPPED:	
+								g = wmi.WMI(computer=ip, user=username, password=upass, namespace="root/default").StdRegProv			
+								if(arch == 'x86'):
+									res1,val1 = g.GetStringValue(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
+								else:
+									res1,val1 = g.GetStringValue(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
+								print  "new current %s version " % (value) + "is " + Fore.YELLOW +  "%s \n\n" % (val1)
 								
 				if (value == "all"):
 					regvalue(vname)
