@@ -2,6 +2,7 @@
 from _winreg import *
 import optparse
 import os
+import threading
 import zipfile
 import sys
 import platform as winos
@@ -59,10 +60,7 @@ def main():
 						sys.exit()
 	
 	connectwmi(from_host,to_host,tgtuser,tgtpass,value,cidr_hosts,sourcefile,destfile)
-		
-	#if (value == "all"):
-	#	enumerate(from_host,to_host,tgtuser,tgtpass,value,cidr_hosts)
-	#else:		
+				
 def svcStatus( svc_name, machine=None):
 		return win32serviceutil.QueryServiceStatus( svc_name, machine)[1]	# scvType, svcState, svcControls, err, svcErr, svcCP, svcWH
 
@@ -121,7 +119,23 @@ def copy_file(ip,user,password,sourcefile,destfile):
 		except:
 			print 'DAT file didnt copied to  C:\Program Files\Common Files\McAfee\%s. Check Permissions' % destfile
 			
-		
+
+def unzip(DAT,ip,destfile):
+	semaphore = threading.BoundedSemaphore()
+	semaphore.acquire()
+	zipp = zipfile.ZipFile('\\\\' + str(ip) + '\\' + str(destfile) + '\\' + DAT)
+	zipp.extractall('\\\\' + str(ip) + '\\' + str(destfile) + '\\')
+	print "DAT files have been extracted at C:\Program Files\Common Files\McAfee\%s" % destfile
+	semaphore.release()	
+	
+def deletefiles(ip,destfile,DAT):
+	semaphore = threading.BoundedSemaphore()
+	semaphore.acquire()
+	os.remove('\\\\' + str(ip) + '\\' + str(destfile) + '\\' + DAT)
+	os.remove('\\\\' + str(ip) + '\\' + str(destfile) + '\\' + "legal.txt")
+	print "files have been deleted at C:\Program Files\Common Files\McAfee\%s" % destfile
+	semaphore.release()	
+	
 	
 def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 	if (cidr_hosts != None):
@@ -171,13 +185,9 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 							svcStop( "McAfeeFramework", unicode(ip))
 							print "DAT: %s.0000" % DAT2val + " is bigger version"
 							copy_file(ip,username,upass,sourcefile,destfile)
-							zipp = zipfile.ZipFile('\\\\' + str(ip) + '\\' + str(destfile) + '\\' + DAT)
-							zipp.extractall('\\\\' + str(ip) + '\\' + str(destfile) + '\\')
-							print "DAT files have been extracted at C:\Program Files\Common Files\McAfee\%s" % destfile
-							os.remove('\\\\' + str(ip) + '\\' + str(destfile) + '\\' + DAT)
-							os.remove('\\\\' + str(ip) + '\\' + str(destfile) + '\\' + "legal.txt")
-					
-					
+							unzip(DAT,ip,destfile)
+							deletefiles(ip,destfile,DAT)
+							
 						status1 = svcStatus( "McShield", unicode(ip))
 						status2 = svcStatus( "McAfeeFramework", unicode(ip))
 						
@@ -192,7 +202,6 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 						
 						if status1 != STOPPED and status2 != STOPPED:	
 								g = wmi.WMI(computer=ip, user=username, password=upass, namespace="root/default").StdRegProv
-									
 								n1,arch1 = g.GetStringValue(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName="SYSTEM\CurrentControlSet\Control\Session Manager\Environment",sValueName="PROCESSOR_ARCHITECTURE")
 								if(arch1 == 'x86'):
 									ress, = g.SetStringValue(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName=r"SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value,sValue=str(DAT2val) + '.0000')
@@ -201,10 +210,6 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 									ress, = g.SetStringValue(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName=r"SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value,sValue=str(DAT2val) + '.0000')
 									res1,val = g.GetStringValue(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
 								print  "new current %s version " % (value) + "is " + Fore.YELLOW +  "%s \n\n" % (val)
-						
-						
-				if (value == "all"):
-					regvalue(vname)
 					
 				elif DAT2val <= valnum:
 					print  "current %s " % (value) + "is " + Fore.YELLOW +  "%s \n\n" % (val)
@@ -231,18 +236,16 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 					print  "The %s " % (value) + "is " + Fore.YELLOW +  "%s \n\n" % (val)
 			else:
 				print 'check registry values or source and destination file to copy'
-		#except: 
-		#	print "Probably host is down or no VSE 8.8.x installed \n\n"
 		except win32service.error, (hr, fn, msg):
         		print "Error starting service: %s" % msg
 					
-	
 def regvalue(val):
 		try:
 			for item in repr(val):
 				print item
 		except:
-			print "no value"			
+			print "no value"	
+					
 if __name__ == '__main__':
 	main()
 	
