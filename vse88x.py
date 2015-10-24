@@ -183,7 +183,7 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 						if status1 != STOPPED and status2 != STOPPED:
 							svcStop( "McShield", unicode(ip))
 							svcStop( "McAfeeFramework", unicode(ip))
-							print "DAT: %s.0000" % DAT2val + " is bigger version"
+							print "DAT: %s.0000" % DAT2val + " is latest version than %s.0000 " % valnum
 							copy_file(ip,username,upass,sourcefile,destfile)
 							unzip(DAT,ip,destfile)
 							deletefiles(ip,destfile,DAT)
