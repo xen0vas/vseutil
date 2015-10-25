@@ -1,4 +1,11 @@
 
+#################################################
+# Author Xenofon Vassilakopoulos				#
+# This tool has being developed in order 		#
+# to help security engineers to automate VSE DAT#
+# updates to endpoints without using ePO		#
+#################################################
+
 from _winreg import *
 import optparse
 import os
