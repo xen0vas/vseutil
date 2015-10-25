@@ -26,50 +26,41 @@ Security engineers who want to keep VSE updated on target machines when ePO is s
 
 ### Running script without any arguments
 
- \- running the script without arguments gives the following information 
+ - Running the script without arguments gives the following information 
  
  
-[\-] Author Xenofon Vassilakopoulos (@xvass) 
+ 
+#####Registry Values:
 
-- Usage: 
-
- 1) vse8800.exe  \-s <from_target> \-t <to_target> \-u <domain\username> \-p <password> \-r "<value>"
-
- 2) vse88x.exe \-c target_ip \-u <domain\username> \-p <password> \-\-sf <src_file> \-\-df <share_folder> \-r "<value>" 
-
- 3) vse88x.exe \-s <from_target> \-t <to_target> \-u <domain\username> \-p <password> \-r "<value>" 
-
- 4) vse88x.exe -c ip/cidr> -u <domain\username> \-p <password> \-\-sf <src_file> \-\-df <share_folder> \-r "<value>" 
-
-\- Registry Values:
-
-\- DATVersion
-\- Version
-\- DatInstallDate
-\- HotFixVersions
-\- Uninstall Command
-\- EngineVersion
-\- DatDate
-\- EngineInstallDate
-
-\- For other values check registry keys:
-
-for 64bit OS \-\-> SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800
-
-for 32bit OS \-\-> SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800
-
-
+- DATVersion
+- Version
+- DatInstallDate
+- HotFixVersions
+- Uninstall Command
+- EngineVersion
+- DatDate
+- EngineInstallDate
+- Install Path
+- Installs CMA
+- Plugin Flag
+- Plugin Path
+- Software ID
+- McTrayAboutBoxDisplay
+- Enforce Flag
+- CLSID
+- Language
+- Product Name
 
 ### Script Options 
 
-- \-c     use this option to specify IP address as well as range of addresses using cidr
-- \-\-sf    use this option to specify the source file that will be copied to target machine
-- \-\-df    use this option to specify the destination that the file will be copied
-- \-r     use this option to specify the registry value you want to review 
-- \-u     use this option to specify username 
-- \-p     use this option to specify password
-- \-s     use this option to specify the first IP address to check
-- \-t     use this option to specify the last IP address to check
+- ```-c```    use this option to specify IP address as well as range of addresses using cidr
+- ```--sf```    use this option to specify the source file that will be copied to target machine
+- ```--df```    use this option to specify the destination that the file will be copied
+- ```-r```     use this option to specify the registry value you want to review 
+- ```-u```     use this option to specify username 
+- ```-p```     use this option to specify password
+- ```-s```     use this option to specify the first IP address to check
+- ```-t```    use this option to specify the last IP address to check
 
 ### How to allow mcafee services modifications
 
@@ -77,25 +68,25 @@ for 32bit OS \-\-> SOFTWARE\Network Associates\ePolicy Orchestrator\Application 
 
 ### Create windows executable
 
-python pyinstaller.py --onefile vse88x.py
+```python pyinstaller.py --onefile vse88x.py```
 
 ### How to run it 
 
 1) Update VSE on a range of machines
 
-vse88x.exe -s from_ip -t to_ip -u DOMAIN\user -p password --sf src_file --df Share_folder_name -r DATVersion
+```vse88x.exe -s from_ip -t to_ip -u DOMAIN\user -p password --sf src_file --df Share_folder_name -r DATVersion```
 
 2) Update VSE on a single machine
 
-vse88x.exe -c target_ip -u DOMAIN\user -p password --sf src_file --df Share_folder_name -r DATVersion
+```vse88x.exe -c target_ip -u DOMAIN\user -p password --sf src_file --df Share_folder_name -r DATVersion```
 
 3) Show Registry values on a range of machines
 
-vse88x.exe -s from_ip -t to_ip -u DOMAIN\user -p password -r DATVersion
+```vse88x.exe -s from_ip -t to_ip -u DOMAIN\user -p password -r DATVersion```
 
 4) Show Registry Values on a range of machine in a subnet using cidr 
 
-vse88x.exe -c ip/cidr -u DOMAIN\user -p password --sf src_file --df Share_folder_name -r DATVersion
+```vse88x.exe -c ip/cidr -u DOMAIN\user -p password --sf src_file --df Share_folder_name -r DATVersion```
 
 ### Example of execution
 
