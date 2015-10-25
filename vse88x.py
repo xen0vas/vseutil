@@ -168,7 +168,7 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 							svcStop( "McShield", unicode(ip))
 							svcStop( "McAfeeFramework", unicode(ip))
 							print Fore.WHITE +"Found installed DAT version " + Fore.YELLOW + "%s.0000" % valnum 
-							print Fore.WHITE +"DAT "+ "latest version " + Fore.YELLOW + "%s.0000 " % DAT2val + " uploded..."
+							print Fore.WHITE +"DAT "+ "latest version " + Fore.YELLOW + "%s.0000 " % DAT2val + Fore.WHITE + " uploded..."
 							copy_file(ip,username,upass,sourcefile,destfile)
 							unzip(DAT,ip,destfile)
 							deletefiles(ip,destfile,DAT)

@@ -98,8 +98,8 @@ Security engineers who want to keep VSE updated on endpoints when ePO is not fun
 
 ```vse88x.exe -c ip -u DOMAIN\user -p password -r "value"```
 
-### Example of execution
+### Execution example
 
-![capture](https://cloud.githubusercontent.com/assets/12726776/10716437/e59d72c0-7b41-11e5-8668-5c5dcae72ca8.PNG)
+![capture](https://cloud.githubusercontent.com/assets/12726776/10717546/79fbf23a-7b64-11e5-8dfd-266ab89e6723.PNG)
 
 
