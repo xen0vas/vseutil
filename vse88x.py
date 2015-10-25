@@ -110,7 +110,8 @@ def unzip(DAT,ip,destfile):
 	semaphore.acquire()
 	zipp = zipfile.ZipFile('\\\\' + str(ip) + '\\' + str(destfile) + '\\' + DAT)
 	zipp.extractall('\\\\' + str(ip) + '\\' + str(destfile) + '\\')
-	print Fore.WHITE + "files have been extracted at C:\Program Files\Common Files\McAfee\%s" % destfile
+	print Fore.WHITE + "files have been extracted to C:\Program Files\Common Files\McAfee\%s" % destfile
+	print Fore.WHITE + "new DAT has been installed.."
 	semaphore.release()	
 	
 def deletefiles(ip,destfile,DAT):
@@ -118,7 +119,7 @@ def deletefiles(ip,destfile,DAT):
 	semaphore.acquire()
 	os.remove('\\\\' + str(ip) + '\\' + str(destfile) + '\\' + DAT)
 	os.remove('\\\\' + str(ip) + '\\' + str(destfile) + '\\' + "legal.txt")
-	print Fore.WHITE + "files have been deleted at C:\Program Files\Common Files\McAfee\%s" % destfile
+	print Fore.WHITE + "cleaning unwanted files at C:\Program Files\Common Files\McAfee\%s" % destfile
 	semaphore.release()	
 	
 def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
@@ -167,7 +168,7 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 							svcStop( "McShield", unicode(ip))
 							svcStop( "McAfeeFramework", unicode(ip))
 							print Fore.WHITE +"Found installed DAT version " + Fore.YELLOW + "%s.0000" % valnum 
-							print Fore.WHITE +"DAT "+ "latest version " + Fore.YELLOW + "%s.0000 " % DAT2val
+							print Fore.WHITE +"DAT "+ "latest version " + Fore.YELLOW + "%s.0000 " % DAT2val + " uploded..."
 							copy_file(ip,username,upass,sourcefile,destfile)
 							unzip(DAT,ip,destfile)
 							deletefiles(ip,destfile,DAT)
@@ -194,11 +195,15 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 						if status1 != STOPPED and status2 != STOPPED:	
 								
 								if(arch == 'x86'):
+									print "updating registry.."
 									result, = c.SetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName=r"SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value,sValue=str(DAT2val) + '.0000')
 									res,val = c.GetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
+									print "registry updated succesfully"
 								else:
+									print "updating registry.."
 									result, = c.SetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName=r"SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value,sValue=str(DAT2val) + '.0000')
 									res,val = c.GetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
+									print "registry updated succesfully"
 								print  Fore.WHITE + "new current %s " % (value) + "is " + Fore.YELLOW +  "%s \n\n" % (val)
 					
 				elif DAT2val <= valnum:

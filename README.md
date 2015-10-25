@@ -6,7 +6,7 @@ vse88x tool performs the following
 - copy latest DAT file to target machine and executes the DAT in order to keep VSE 8.8.x antivirus updated
 - runs on 32bit as well as 64bit Windows OS
 
-the following article describes the steps updating VSE manually
+The vse88x script developed based on the following article which describes the steps to update VSE 8.8.x DAT files on endpoints machines manually
 
 https://kc.mcafee.com/corporate/index?page=content&id=KB51679
 
@@ -100,6 +100,6 @@ Security engineers who want to keep VSE updated on endpoints when ePO is not fun
 
 ### Example of execution
 
-![execution_2](https://cloud.githubusercontent.com/assets/12726776/10712004/78cc29cc-7a95-11e5-9dbc-0089dcc282b1.PNG)
+![capture](https://cloud.githubusercontent.com/assets/12726776/10716437/e59d72c0-7b41-11e5-8668-5c5dcae72ca8.PNG)
 
 
