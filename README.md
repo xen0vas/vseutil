@@ -30,7 +30,7 @@ Security engineers who want to keep VSE updated on endpoints when ePO is not fun
 
  - Running the script without arguments gives the following
 
-![vse88](https://cloud.githubusercontent.com/assets/12726776/10715687/f30fe588-7b27-11e5-8d53-246ca046d028.PNG)
+![vse88](https://cloud.githubusercontent.com/assets/12726776/10715882/a0cc5ab6-7b2e-11e5-9ef0-d098d66b2553.PNG)
  
 #####Registry Values:
 
