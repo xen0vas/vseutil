@@ -24,6 +24,9 @@ Security engineers who want to keep VSE updated on target machines when ePO is s
 - Target machines must alow wmi connections to manipulate registry values remotely using a domain privilege user
 - Allow SMB connections from domain privilege user 
 
+### Registry Values
+
+
 ### Script Options 
 
 - \-c     use this option to specify IP address as well as range of addresses using cidr
