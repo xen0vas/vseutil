@@ -1,6 +1,6 @@
 # vse88x
 
-This executable performs the following
+This tool performs the following
 
 - scan networks and single machines and reads McAfee VSE windows registry values
 - copy latest DAT file to target machine and executes the DAT in order to keep VSE antivirus updated
@@ -15,20 +15,20 @@ https://kc.mcafee.com/corporate/index?page=content&id=KB51679
 
 ### Who need this
 
-Security engineers who want to keep VSE updated on target machines when ePO is screwed up.
+Security engineers who want to keep VSE updated on endpoints when ePO is not functioning correctly.
 
 ### Prerequisites
 
 - C:\Program Files\Common Files\McAfee\Engine must be shared to domain privilege user with read/write permissions
 - McAfee services McShield and McAfeeFramework must be allowed to be modified on target machines
-- Target machines must alow wmi connections to manipulate registry values remotely using a domain privilege user
-- Allow SMB connections from domain privilege user 
+- Endpoints must alow WMI connections from privileged domain users to manipulate registry values
+- Privilleged domain users must be able to connect through SMB connections to endpoints that have VSE 8.8.x installed
 
 ### Running script without any arguments
 
- - Running the script without arguments gives the following information 
- 
- 
+ - Running the script without arguments gives the following
+
+![vse88](https://cloud.githubusercontent.com/assets/12726776/10715687/f30fe588-7b27-11e5-8d53-246ca046d028.PNG)
  
 #####Registry Values:
 
