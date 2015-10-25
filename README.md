@@ -26,37 +26,37 @@ Security engineers who want to keep VSE updated on target machines when ePO is s
 
 ### Running script without any arguments
 
- - running the script without arguments gives the following information 
+ \- running the script without arguments gives the following information 
  
  
-[-] Author Xenofon Vassilakopoulos (@xvass) 
+[\-] Author Xenofon Vassilakopoulos (@xvass) 
 
 - Usage: 
 
- 1) vse8800.exe  -s <from_target> -t <to_target> -u <domain\username> -p <password> -r "<value>"
+ 1) vse8800.exe  \-s <from_target> \-t <to_target> \-u <domain\username> \-p <password> \-r "<value>"
 
- 2) vse88x.exe -c target_ip -u <domain\username> -p <password> --sf <src_file> --df <share_folder> -r "<value>" 
+ 2) vse88x.exe \-c target_ip \-u <domain\username> \-p <password> \-\-sf <src_file> \-\-df <share_folder> \-r "<value>" 
 
- 3) vse88x.exe -s <from_target> -t <to_target> -u <domain\username> -p <password> -r "<value>" 
+ 3) vse88x.exe \-s <from_target> \-t <to_target> \-u <domain\username> \-p <password> \-r "<value>" 
 
- 4) vse88x.exe -c ip/cidr> -u <domain\username> -p <password> --sf <src_file> --df <share_folder> -r "<value>" 
+ 4) vse88x.exe -c ip/cidr> -u <domain\username> \-p <password> \-\-sf <src_file> \-\-df <share_folder> \-r "<value>" 
 
-- Registry Values:
+\- Registry Values:
 
-- DATVersion
-- Version
-- DatInstallDate
-- HotFixVersions
-- Uninstall Command
-- EngineVersion
-- DatDate
-- EngineInstallDate
+\- DATVersion
+\- Version
+\- DatInstallDate
+\- HotFixVersions
+\- Uninstall Command
+\- EngineVersion
+\- DatDate
+\- EngineInstallDate
 
-- For other values check registry keys:
+\- For other values check registry keys:
 
-for 64bit OS --> SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800
+for 64bit OS \-\-> SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800
 
-for 32bit OS --> SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800
+for 32bit OS \-\-> SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800
 
 
 
