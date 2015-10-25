@@ -160,12 +160,20 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 						if status1 != STOPPED and status2 != STOPPED:
 							svcStop( "McShield", unicode(ip))
 							svcStop( "McAfeeFramework", unicode(ip))
-							print Fore.WHITE +"Found installed DAT: " + Fore.YELLOW + "%s.0000" % valnum 
-							print Fore.WHITE +"DAT: "+ " is latest version " + Fore.YELLOW + "%s.0000 " % DAT2val
+							print Fore.WHITE +"Found installed DAT version " + Fore.YELLOW + "%s.0000" % valnum 
+							print Fore.WHITE +"DAT "+ "latest version " + Fore.YELLOW + "%s.0000 " % DAT2val
 							copy_file(ip,username,upass,sourcefile,destfile)
 							unzip(DAT,ip,destfile)
 							deletefiles(ip,destfile,DAT)
 							
+						if status1 == STOPPED and status2 != STOPPED:
+							arg="win32service.SERVICE_ALL_ACCESS"
+							svcStart( "McShield",arg, unicode(ip))
+							
+						if status1 != STOPPED and status2 == STOPPED:
+							arg="win32service.SERVICE_ALL_ACCESS"
+							svcStart( "McAfeeFramework",arg, unicode(ip))
+						
 						status1 = svcStatus( "McShield", unicode(ip))
 						status2 = svcStatus( "McAfeeFramework", unicode(ip))
 						
