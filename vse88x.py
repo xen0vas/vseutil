@@ -16,17 +16,15 @@ import socket
 import time
 from types import *
 import win32api
-import win32com
+import win32con
 import win32service
 import win32serviceutil
 import win32event
-
 
 RUNNING = win32service.SERVICE_RUNNING
 STARTING = win32service.SERVICE_START_PENDING
 STOPPING = win32service.SERVICE_STOP_PENDING
 STOPPED = win32service.SERVICE_STOPPED
-
 
 init()
 
@@ -53,7 +51,6 @@ def main():
 	sourcefile = options.sourcefile
 	destfile = options.destinationfile
 	
-
 	if (value == None and tgtuser == None and tgtpass == None and from_host == None and to_host == None):
 			if (tgtuser == None or tgtpass == None or cidr_hosts == None):
 						print parser.usage
@@ -62,7 +59,7 @@ def main():
 	connectwmi(from_host,to_host,tgtuser,tgtpass,value,cidr_hosts,sourcefile,destfile)
 				
 def svcStatus( svc_name, machine=None):
-		return win32serviceutil.QueryServiceStatus( svc_name, machine)[1]	# scvType, svcState, svcControls, err, svcErr, svcCP, svcWH
+		return win32serviceutil.QueryServiceStatus( svc_name, machine)[1]
 
 def svcStop( svc_name, machine=None):
 		status = win32serviceutil.StopServiceWithDeps( svc_name, machine,30)
@@ -79,25 +76,6 @@ def svcStart(svc_name,svc_arg, machine=None):
 			status = svcStatus( svc_name, machine)
 		return status
 
-def enumerate(fromh,toh,username,upass,value,cidr_hosts):
-	if (cidr_hosts != None):
-		iprange = IPNetwork(cidr_hosts)
-	else:
-		iprange = IPRange(fromh, toh)
-	for ip in iprange:
-		print Fore.WHITE + "\n" + "IP: %s" % ip + "\n\n"
-		try:	
-			c = wmi.WMI(computer=ip, user=username, password=upass, namespace="root/default").StdRegProv
-			t = OpenKey(HKEY_LOCAL_MACHINE, r"SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800", 0, KEY_ALL_ACCESS)
-			count = 0
-			while 1:
-				name, value, type = c.EnumKey(t, count)
-				print repr(name),
-				count = count + 1
-			CloseKey(t)
-		except:
-			print "there is an error in wmi connection"
-
 def wnet_connect(host, username, password):
 	unc = ''.join(['\\\\', str(host)])
 	try:
@@ -111,21 +89,22 @@ def wnet_connect(host, username, password):
 			raise err
 
 def copy_file(ip,user,password,sourcefile,destfile):
-	
+		semaphore = threading.BoundedSemaphore()
+		semaphore.acquire()
 		wnet_connect(ip, user, password)
 		try:
 			shutil.copy2(sourcefile,'\\\\' + str(ip) + '\\' + str(destfile) + '\\')
-			print  'file ' + Fore.YELLOW + sourcefile + Fore.WHITE + ' copied to C:\Program Files\Common Files\McAfee\%s' % destfile
+			print Fore.WHITE + 'file ' + Fore.YELLOW + sourcefile + Fore.WHITE + ' copied to C:\Program Files\Common Files\McAfee\%s' % destfile
 		except:
-			print 'file did not copied to C:\Program Files\Common Files\McAfee\%s. Check Permissions' % destfile
-			
+			print Fore.WHITE + 'file did not copied to C:\Program Files\Common Files\McAfee\%s. Check Permissions' % destfile
+		semaphore.release()	
 
 def unzip(DAT,ip,destfile):
 	semaphore = threading.BoundedSemaphore()
 	semaphore.acquire()
 	zipp = zipfile.ZipFile('\\\\' + str(ip) + '\\' + str(destfile) + '\\' + DAT)
 	zipp.extractall('\\\\' + str(ip) + '\\' + str(destfile) + '\\')
-	print "files have been extracted at C:\Program Files\Common Files\McAfee\%s" % destfile
+	print Fore.WHITE + "files have been extracted at C:\Program Files\Common Files\McAfee\%s" % destfile
 	semaphore.release()	
 	
 def deletefiles(ip,destfile,DAT):
@@ -133,9 +112,8 @@ def deletefiles(ip,destfile,DAT):
 	semaphore.acquire()
 	os.remove('\\\\' + str(ip) + '\\' + str(destfile) + '\\' + DAT)
 	os.remove('\\\\' + str(ip) + '\\' + str(destfile) + '\\' + "legal.txt")
-	print "files have been deleted at C:\Program Files\Common Files\McAfee\%s" % destfile
+	print Fore.WHITE + "files have been deleted at C:\Program Files\Common Files\McAfee\%s" % destfile
 	semaphore.release()	
-	
 	
 def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 	if (cidr_hosts != None):
@@ -145,17 +123,17 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 	for ip in iprange:
 		print Fore.WHITE + "\n" + "IP: %s" % ip + "\n\n"
 		try:
+			c = wmi.WMI(computer=ip, user=username, password=upass, namespace="root/default").StdRegProv
+			
 			if (value == 'DATVersion' and sourcefile != None and destfile != None and username != None and upass != None):
-				
-				c = wmi.WMI(computer=ip, user=username, password=upass, namespace="root/default").StdRegProv
-				
-				n,arch = c.GetStringValue(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName="SYSTEM\CurrentControlSet\Control\Session Manager\Environment",sValueName="PROCESSOR_ARCHITECTURE")
+			
+				n,arch = c.GetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName="SYSTEM\CurrentControlSet\Control\Session Manager\Environment",sValueName="PROCESSOR_ARCHITECTURE")
 				if(arch == 'x86'):	
-					results, vname = c.EnumKey(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800")
-					res,val = c.GetStringValue(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
+					
+					res,val = c.GetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
 				else:
-					results, vname = c.EnumKey(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800")
-					res,val = c.GetStringValue(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
+					
+					res,val = c.GetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
 				
 				try:
 					uname=username.split('\\')
@@ -164,8 +142,7 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 				except:
 					user=username
 					domain=None
-					
-				
+						
 				splitval = val 
 				valsplit = splitval.split('.')
 				sourcefilesplit = sourcefile.split('\\')
@@ -183,7 +160,8 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 						if status1 != STOPPED and status2 != STOPPED:
 							svcStop( "McShield", unicode(ip))
 							svcStop( "McAfeeFramework", unicode(ip))
-							print "DAT: %s.0000" % DAT2val + " is latest version than %s.0000 " % valnum
+							print Fore.WHITE +"Found installed DAT: " + Fore.YELLOW + "%s.0000" % valnum 
+							print Fore.WHITE +"DAT: "+ " is latest version " + Fore.YELLOW + "%s.0000 " % DAT2val
 							copy_file(ip,username,upass,sourcefile,destfile)
 							unzip(DAT,ip,destfile)
 							deletefiles(ip,destfile,DAT)
@@ -200,18 +178,17 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 						status2 = svcStatus( "McAfeeFramework", unicode(ip))
 						
 						if status1 != STOPPED and status2 != STOPPED:	
-								g = wmi.WMI(computer=ip, user=username, password=upass, namespace="root/default").StdRegProv
-								n1,arch1 = g.GetStringValue(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName="SYSTEM\CurrentControlSet\Control\Session Manager\Environment",sValueName="PROCESSOR_ARCHITECTURE")
-								if(arch1 == 'x86'):
-									ress, = g.SetStringValue(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName=r"SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value,sValue=str(DAT2val) + '.0000')
-									res1,val = g.GetStringValue(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
+								
+								if(arch == 'x86'):
+									result, = c.SetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName=r"SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value,sValue=str(DAT2val) + '.0000')
+									res,val = c.GetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
 								else:
-									ress, = g.SetStringValue(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName=r"SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value,sValue=str(DAT2val) + '.0000')
-									res1,val = g.GetStringValue(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
-								print  "new current %s version " % (value) + "is " + Fore.YELLOW +  "%s \n\n" % (val)
+									result, = c.SetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName=r"SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value,sValue=str(DAT2val) + '.0000')
+									res,val = c.GetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
+								print  Fore.WHITE + "new current %s " % (value) + "is " + Fore.YELLOW +  "%s \n\n" % (val)
 					
 				elif DAT2val <= valnum:
-					print  "current %s " % (value) + "is " + Fore.YELLOW +  "%s \n\n" % (val)
+					print Fore.WHITE + "current %s " % (value) + "is " + Fore.YELLOW +  "%s \n\n" % (val)
 				
 			elif(value == None and sourcefile != None and destfile != None):
 				try:
@@ -220,30 +197,19 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 						print "file didnt copied to destination %s" % destfile
 						
 			elif(value != None and sourcefile == None and destfile == None and username != None and upass != None):
-
-				c = wmi.WMI(computer=ip, user=username, password=upass, namespace="root/default").StdRegProv
-				n,arch = c.GetStringValue(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName="SYSTEM\CurrentControlSet\Control\Session Manager\Environment",sValueName="PROCESSOR_ARCHITECTURE")
+				n,arch = c.GetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName="SYSTEM\CurrentControlSet\Control\Session Manager\Environment",sValueName="PROCESSOR_ARCHITECTURE")
 				if(arch == 'x86'):	
-					results, vname = c.EnumKey(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800")
 					res,val = c.GetStringValue(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
 				else:
-					results, vname = c.EnumKey(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800")
 					res,val = c.GetStringValue(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
-				if (value == "all"):
-					regvalue(vname)
-				else:
-					print  "The %s " % (value) + "is " + Fore.YELLOW +  "%s \n\n" % (val)
+				print  "The %s " % (value) + "is " + Fore.YELLOW +  "%s \n\n" % (val)
+			
 			else:
 				print 'check registry values or source and destination file to copy'
+				
 		except win32service.error, (hr, fn, msg):
-        		print "Error starting service: %s" % msg
+			print "Error starting service: %s" % msg
 					
-def regvalue(val):
-		try:
-			for item in repr(val):
-				print item
-		except:
-			print "no value"	
 					
 if __name__ == '__main__':
 	main()
