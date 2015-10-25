@@ -1,11 +1,10 @@
 
 #################################################
-# Author Xenofon Vassilakopoulos				#
-# This tool has being developed in order 		#
+# Author: Xenofon Vassilakopoulos		#
+# This tool has being developed in order 	#
 # to help security engineers to automate VSE DAT#
-# updates to endpoints without using ePO		#
+# updates to endpoints without using ePO	#
 #################################################
-
 from _winreg import *
 import optparse
 import os
@@ -37,7 +36,7 @@ init()
 
 def main():
 	
-	parser = optparse.OptionParser('\n\n[-] Author Xenofon Vassilakopoulos , Systems Security Engineer - custom script for searching VSE registry information\n\n- Usage: vse8800.exe  -s <from_target> -t <to_target> -u <domain\username> -p <password> -r  "<value>"\n\nRegistry Values\n\n- DATVersion\n- Version\n- DatInstallDate\n- HotFixVersions\n- Uninstall Command\n- EngineVersion\n- DatDate\n- EngineInstallDate\n\nFor other values check registry keys\n\nfor 64bit OS --> SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800\n\nfor 32bit OS --> SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800\n\n')
+	parser = optparse.OptionParser('\n\n[-] Author Xenofon Vassilakopoulos (@xvass) \n\n- Usage: \n\n 1) vse8800.exe  -s <from_target> -t <to_target> -u <domain\username> -p <password> -r "<value>"\n\n 2) vse88x.exe -c target_ip -u <domain\username> -p <password> --sf <src_file> --df <share_folder> -r "<value>" \n\n 3) vse88x.exe -s <from_target> -t <to_target> -u <domain\username> -p <password> -r "<value>" \n\n 4) vse88x.exe -c ip/cidr> -u <domain\username> -p <password> --sf <src_file> --df <share_folder> -r "<value>" \n\n- Registry Values:\n\n- DATVersion\n- Version\n- DatInstallDate\n- HotFixVersions\n- Uninstall Command\n- EngineVersion\n- DatDate\n- EngineInstallDate\n\n- For other values check registry keys:\n\nfor 64bit OS --> SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800\n\nfor 32bit OS --> SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800\n\n')
 	parser.add_option('-r', dest = 'regname', type ='string',help = 'registry key')
 	parser.add_option('-u', dest = 'uname', type='string',help='user name with domain or workgroup')
 	parser.add_option('-p', dest = 'upassword', type='string', help='user password')
