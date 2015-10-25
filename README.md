@@ -1,9 +1,10 @@
 # vse88x
 
-This tool performs the following
+vse88x tool performs the following
 
-- scan networks and single machines and reads McAfee VSE windows registry values
-- copy latest DAT file to target machine and executes the DAT in order to keep VSE antivirus updated
+- scan networks and single machines and reads McAfee VSE 8.8.x windows registry values
+- copy latest DAT file to target machine and executes the DAT in order to keep VSE 8.8.x antivirus updated
+- runs on 32bit as well as 64bit Windows OS
 
 the following article describes the steps updating VSE manually
 
@@ -19,7 +20,8 @@ Security engineers who want to keep VSE updated on endpoints when ePO is not fun
 
 ### Prerequisites
 
-- C:\Program Files\Common Files\McAfee\Engine must be shared to domain privilege user with read/write permissions
+- C:\Program Files\Common Files\McAfee\Engine must be shared
+- Privileged domain users must have read/write permissions to C:\Program Files\Common Files\McAfee\Engine
 - McAfee services McShield and McAfeeFramework must be allowed to be modified on target machines
 - Endpoints must alow WMI connections from privileged domain users to manipulate registry values
 - Privilleged domain users must be able to connect through SMB connections to endpoints that have VSE 8.8.x installed
@@ -72,21 +74,29 @@ Security engineers who want to keep VSE updated on endpoints when ePO is not fun
 
 ### How to run it 
 
-1) Update VSE on a range of machines
+1) Update VSE on a range of machines in subnet
 
-```vse88x.exe -s from_ip -t to_ip -u DOMAIN\user -p password --sf src_file --df Share_folder_name -r DATVersion```
+```vse88x.exe -s from_ip -t to_ip -u DOMAIN\user -p password --sf src_file --df Share_folder_name -r "value"```
 
 2) Update VSE on a single machine
 
-```vse88x.exe -c target_ip -u DOMAIN\user -p password --sf src_file --df Share_folder_name -r DATVersion```
+```vse88x.exe -c target_ip -u DOMAIN\user -p password --sf src_file --df Share_folder_name -r "value"```
 
-3) Show Registry values on a range of machines
+3) Update VSE on a range of machines in a subnet using cidr
 
-```vse88x.exe -s from_ip -t to_ip -u DOMAIN\user -p password -r DATVersion```
+```vse88x.exe -c ip/cidr -u DOMAIN\user -p password --sf src_file --df Share_folder_name -r "value"```
 
-4) Show Registry Values on a range of machine in a subnet using cidr 
+4) Show registry values on a range of machines in a subnet
 
-```vse88x.exe -c ip/cidr -u DOMAIN\user -p password --sf src_file --df Share_folder_name -r DATVersion```
+```vse88x.exe -s from_ip -t to_ip -u DOMAIN\user -p password -r "value"```
+
+5) Show registry value on a range of machines in a subnet using cidr 
+
+```vse88x.exe -c ip/cidr -u DOMAIN\user -p password -r "value"```
+
+6) Show registry value on a single machine
+
+```vse88x.exe -c ip -u DOMAIN\user -p password -r "value"```
 
 ### Example of execution
 
