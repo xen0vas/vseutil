@@ -128,7 +128,7 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 	else:
 		iprange = IPRange(fromh, toh)
 	for ip in iprange:
-		print Fore.WHITE + "\n" + "IP: %s" % ip + "\n\n"
+		print Fore.WHITE + "\n" + "[-] IP: %s" % ip + "\n"
 		try:
 			try:	
 				c = wmi.WMI(computer=ip, user=username, password=upass, namespace="root/default").StdRegProv
