@@ -100,6 +100,5 @@ Security engineers who want to keep VSE updated on endpoints when ePO is not fun
 
 ### Execution example
 
-![capture](https://cloud.githubusercontent.com/assets/12726776/10723990/3fc26ee0-7bc9-11e5-9d1b-1beed8028b88.PNG)
-
+![capture](https://cloud.githubusercontent.com/assets/12726776/10724586/694737c8-7bce-11e5-948b-61a389d6e3d8.PNG)
 
