@@ -134,8 +134,8 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 				c = wmi.WMI(computer=ip, user=username, password=upass, namespace="root/default").StdRegProv
 				print "[*] Connected to host with IP: %s" % ip
 			except:
-				print "[*] Not connected to host with IP adreess %s" % ip
-				exit(1)
+				print "[*] Not connected to host with IP address %s" % ip
+				continue
 			
 			if (value == 'DATVersion' and sourcefile != None and destfile != None and username != None and upass != None):
 			
@@ -238,7 +238,7 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 				
 		except win32service.error, (hr, fn, msg):
 			print "[*] Error starting service: %s" % msg
-					
+			continue
 					
 if __name__ == '__main__':
 	main()
