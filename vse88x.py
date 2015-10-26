@@ -209,7 +209,8 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 									res,val = c.GetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
 									print "[*] registry updated succesfully"
 								print  Fore.WHITE + "[*] new current %s " % (value) + "is " + Fore.YELLOW +  "%s \n\n" % (val)
-					
+						elif id_val == 1:
+							print "[*] Registry cannot be updated. Please check McAfee services in case they are not both stopped.\n"
 				elif DAT2val <= valnum:
 					print Fore.WHITE + "[*] current %s " % (value) + "is " + Fore.YELLOW +  "%s \n\n" % (val)
 				
