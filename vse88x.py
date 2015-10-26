@@ -131,6 +131,7 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 		print Fore.WHITE + "\n" + "IP: %s" % ip + "\n\n"
 		try:
 			c = wmi.WMI(computer=ip, user=username, password=upass, namespace="root/default").StdRegProv
+			print "[*] Connected to Machine with IP: %s" % ip + "\n"
 			
 			if (value == 'DATVersion' and sourcefile != None and destfile != None and username != None and upass != None):
 			
