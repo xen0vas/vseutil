@@ -200,7 +200,7 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 						status1 = svcStatus( "McShield", unicode(ip))
 						status2 = svcStatus( "McAfeeFramework", unicode(ip))
 						
-						if status1 != STOPPED and status2 != STOPPED and id != 1:	
+						if status1 != STOPPED and status2 != STOPPED and id != 1 :	
 								
 								if(arch == 'x86'):
 									print "[*] updating registry.."
@@ -212,7 +212,7 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 									result, = c.SetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName=r"SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value,sValue=str(DAT2val) + '.0000')
 									res,val = c.GetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
 									print "[*] registry updated succesfully"
-								print  Fore.WHITE + "new current %s " % (value) + "is " + Fore.YELLOW +  "%s \n\n" % (val)
+								print  Fore.WHITE + "[*] new current %s " % (value) + "is " + Fore.YELLOW +  "%s \n\n" % (val)
 					
 				elif DAT2val <= valnum:
 					print Fore.WHITE + "[*] current %s " % (value) + "is " + Fore.YELLOW +  "%s \n\n" % (val)
