@@ -179,13 +179,13 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 							arg="win32service.SERVICE_ALL_ACCESS"
 							svcStart( "McShield",arg, unicode(ip))
 						else:
-							id=1
+							id=2
 							
 						if status1 != STOPPED and status2 == STOPPED:
 							arg="win32service.SERVICE_ALL_ACCESS"
 							svcStart( "McAfeeFramework",arg, unicode(ip))
 						else:
-							id=1
+							id=3
 							
 						status1 = svcStatus( "McShield", unicode(ip))
 						status2 = svcStatus( "McAfeeFramework", unicode(ip))
@@ -195,12 +195,12 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 							svcStart( "McShield",arg, unicode(ip))	
 							svcStart( "McAfeeFramework",arg, unicode(ip))
 						else:
-							id=1
+							id=4
 						
 						status1 = svcStatus( "McShield", unicode(ip))
 						status2 = svcStatus( "McAfeeFramework", unicode(ip))
 						
-						if status1 != STOPPED and status2 != STOPPED and id!=1:	
+						if status1 != STOPPED and status2 != STOPPED and id != 1:	
 								
 								if(arch == 'x86'):
 									print "[*] updating registry.."
