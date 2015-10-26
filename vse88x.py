@@ -100,9 +100,9 @@ def copy_file(ip,user,password,sourcefile,destfile):
 		wnet_connect(ip, user, password)
 		try:
 			shutil.copy2(sourcefile,'\\\\' + str(ip) + '\\' + str(destfile) + '\\')
-			print Fore.WHITE + 'file ' + Fore.YELLOW + sourcefile + Fore.WHITE + ' copied to C:\Program Files\Common Files\McAfee\%s' % destfile
+			print Fore.WHITE + '[*] file ' + Fore.YELLOW + sourcefile + Fore.WHITE + ' copied to C:\Program Files\Common Files\McAfee\%s' % destfile
 		except:
-			print Fore.WHITE + 'file did not copied to C:\Program Files\Common Files\McAfee\%s. Check Permissions' % destfile
+			print Fore.WHITE + '[*] file did not copied to C:\Program Files\Common Files\McAfee\%s. Check Permissions' % destfile
 		semaphore.release()	
 
 def unzip(DAT,ip,destfile):
@@ -110,8 +110,8 @@ def unzip(DAT,ip,destfile):
 	semaphore.acquire()
 	zipp = zipfile.ZipFile('\\\\' + str(ip) + '\\' + str(destfile) + '\\' + DAT)
 	zipp.extractall('\\\\' + str(ip) + '\\' + str(destfile) + '\\')
-	print Fore.WHITE + "files have been extracted to C:\Program Files\Common Files\McAfee\%s" % destfile
-	print Fore.WHITE + "new DAT has been installed.."
+	print Fore.WHITE + "[*] files have been extracted to C:\Program Files\Common Files\McAfee\%s" % destfile
+	print Fore.WHITE + "[*] new DAT has been installed.."
 	semaphore.release()	
 	
 def deletefiles(ip,destfile,DAT):
@@ -119,7 +119,7 @@ def deletefiles(ip,destfile,DAT):
 	semaphore.acquire()
 	os.remove('\\\\' + str(ip) + '\\' + str(destfile) + '\\' + DAT)
 	os.remove('\\\\' + str(ip) + '\\' + str(destfile) + '\\' + "legal.txt")
-	print Fore.WHITE + "cleaning unwanted files at C:\Program Files\Common Files\McAfee\%s" % destfile
+	print Fore.WHITE + "[*] cleaning unwanted files at C:\Program Files\Common Files\McAfee\%s" % destfile
 	semaphore.release()	
 	
 def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
@@ -167,20 +167,26 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 						if status1 != STOPPED and status2 != STOPPED:
 							svcStop( "McShield", unicode(ip))
 							svcStop( "McAfeeFramework", unicode(ip))
-							print Fore.WHITE +"Found installed DAT version " + Fore.YELLOW + "%s.0000" % valnum 
-							print Fore.WHITE +"DAT "+ "latest version " + Fore.YELLOW + "%s.0000 " % DAT2val + Fore.WHITE + " uploded..."
+							print Fore.WHITE +"[*] Found installed DAT version " + Fore.YELLOW + "%s.0000" % valnum 
+							print Fore.WHITE +"[*] DAT "+ "latest version " + Fore.YELLOW + "%s.0000 " % DAT2val + Fore.WHITE + " uploded..."
 							copy_file(ip,username,upass,sourcefile,destfile)
 							unzip(DAT,ip,destfile)
 							deletefiles(ip,destfile,DAT)
+						else:
+							id=1
 							
 						if status1 == STOPPED and status2 != STOPPED:
 							arg="win32service.SERVICE_ALL_ACCESS"
 							svcStart( "McShield",arg, unicode(ip))
+						else:
+							id=1
 							
 						if status1 != STOPPED and status2 == STOPPED:
 							arg="win32service.SERVICE_ALL_ACCESS"
 							svcStart( "McAfeeFramework",arg, unicode(ip))
-						
+						else:
+							id=1
+							
 						status1 = svcStatus( "McShield", unicode(ip))
 						status2 = svcStatus( "McAfeeFramework", unicode(ip))
 						
@@ -188,32 +194,34 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 							arg="win32service.SERVICE_ALL_ACCESS"
 							svcStart( "McShield",arg, unicode(ip))	
 							svcStart( "McAfeeFramework",arg, unicode(ip))
+						else:
+							id=1
 						
 						status1 = svcStatus( "McShield", unicode(ip))
 						status2 = svcStatus( "McAfeeFramework", unicode(ip))
 						
-						if status1 != STOPPED and status2 != STOPPED:	
+						if status1 != STOPPED and status2 != STOPPED and id!=1:	
 								
 								if(arch == 'x86'):
-									print "updating registry.."
+									print "[*] updating registry.."
 									result, = c.SetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName=r"SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value,sValue=str(DAT2val) + '.0000')
 									res,val = c.GetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
-									print "registry updated succesfully"
+									print "[*] registry updated succesfully"
 								else:
-									print "updating registry.."
+									print "[*] updating registry.."
 									result, = c.SetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName=r"SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value,sValue=str(DAT2val) + '.0000')
 									res,val = c.GetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
-									print "registry updated succesfully"
+									print "[*] registry updated succesfully"
 								print  Fore.WHITE + "new current %s " % (value) + "is " + Fore.YELLOW +  "%s \n\n" % (val)
 					
 				elif DAT2val <= valnum:
-					print Fore.WHITE + "current %s " % (value) + "is " + Fore.YELLOW +  "%s \n\n" % (val)
+					print Fore.WHITE + "[*] current %s " % (value) + "is " + Fore.YELLOW +  "%s \n\n" % (val)
 				
 			elif(value == None and sourcefile != None and destfile != None):
 				try:
 					copy_file(ip,username,upass,sourcefile,destfile)
 				except:
-						print "file didnt copied to destination %s" % destfile
+						print "[*] file didnt copied to destination %s" % destfile
 						
 			elif(value != None and sourcefile == None and destfile == None and username != None and upass != None):
 				n,arch = c.GetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName="SYSTEM\CurrentControlSet\Control\Session Manager\Environment",sValueName="PROCESSOR_ARCHITECTURE")
@@ -221,13 +229,13 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 					res,val = c.GetStringValue(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
 				else:
 					res,val = c.GetStringValue(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
-				print  "The %s " % (value) + "is " + Fore.YELLOW +  "%s \n\n" % (val)
+				print  "[*] The %s " % (value) + "is " + Fore.YELLOW +  "%s \n\n" % (val)
 			
 			else:
-				print 'check registry values or source and destination file to copy'
+				print '[*] check registry values or source and destination file to copy'
 				
 		except win32service.error, (hr, fn, msg):
-			print "Error starting service: %s" % msg
+			print "[*] Error starting service: %s" % msg
 					
 					
 if __name__ == '__main__':
