@@ -168,7 +168,7 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 				if DAT2val > valnum:				
 						status1 = svcStatus( "McShield", unicode(ip))
 						status2 = svcStatus( "McAfeeFramework", unicode(ip))
-													
+						id_val = 0						
 						if status1 != STOPPED and status2 != STOPPED:
 							svcStop( "McShield", unicode(ip))
 							svcStop( "McAfeeFramework", unicode(ip))
