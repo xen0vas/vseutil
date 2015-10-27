@@ -2,9 +2,9 @@
 
 vse88x tool performs the following
 
-- scan networks and single machines and reads McAfee VSE 8.8.x windows registry values
-- copy latest DAT file to target machine and executes the DAT in order to keep VSE 8.8.x antivirus updated
-- runs on 32bit as well as 64bit Windows OS
+- Scan networks and single machines and reads McAfee VSE 8.8.x windows registry values
+- Copy latest DAT file to target machine and executes the DAT in order to keep VSE 8.8.x antivirus updated
+- Runs on 32bit as well as 64bit Windows OS
 
 The vse88x script developed based on the following article which describes the steps to update VSE 8.8.x DAT files on endpoints machines manually
 
@@ -25,6 +25,26 @@ Security engineers who want to keep VSE updated on endpoints when ePO is not fun
 - McAfee services McShield and McAfeeFramework must be allowed to be modified on target machines
 - Endpoints must alow WMI connections from privileged domain users to manipulate registry values
 - Privilleged domain users must be able to connect through SMB connections to endpoints that have VSE 8.8.x installed
+
+### Security Concerns 
+
+As shown at the previous image this tool can run only when no service protection is enabled. Because we dont want non-privileged end users to stop McAfee services from functioning, but we also want only one privileged user to be able to modify the services, we need to add this domain user at local security policy user rights management and then select act as part of the operating system, where we add the privileged domain user as shown at the following images. 
+
+- Administrative tools --> Local security policy 
+
+![local](https://cloud.githubusercontent.com/assets/12726776/10758540/9ed76f56-7cba-11e5-8fa9-041a6eb055d6.PNG)
+
+- Local Security Policy --> User Rights Assignment
+
+![rights](https://cloud.githubusercontent.com/assets/12726776/10758547/a2e8c996-7cba-11e5-9f09-b3aac02b63f8.PNG)
+
+- User Rights Assignment --> act as part of the operating system 
+
+![act](https://cloud.githubusercontent.com/assets/12726776/10758544/a1a23392-7cba-11e5-9bda-9a856d37af76.PNG)
+
+- act as part of the operating system --> add domain user
+
+![user](https://cloud.githubusercontent.com/assets/12726776/10758664/8768a1ea-7cbb-11e5-82c6-6944c26e9f81.PNG)
 
 ### Running script without any arguments
 
@@ -63,6 +83,7 @@ Security engineers who want to keep VSE updated on endpoints when ePO is not fun
 - ```-p```     use this option to specify password
 - ```-s```     use this option to specify the first IP address to check
 - ```-t```    use this option to specify the last IP address to check
+- ```--out``` use this option to save the output into a log file
 
 ### How to allow mcafee services modifications
 

@@ -38,6 +38,7 @@ def main():
 	
 	parser = optparse.OptionParser('\n\nAuthor: Xenofon Vassilakopoulos (@xvass) \n\n[-] Usage: \n\n 1) vse88x.exe  -s <from_target> -t <to_target> -u <domain\username> -p <password> -r "<value>"\n\n 2) vse88x.exe -c target_ip -u <domain\username> -p <password> --sf <src_file> --df <share_folder> -r "<value>" \n\n 3) vse88x.exe -s <from_target> -t <to_target> -u <domain\username> -p <password> --sf <src_file> --df <share_folder> -r "<value>"\n\n 4) vse88x.exe -c <ip/cidr> -u <domain\username> -p <password> --sf <src_file> --df <share_folder> -r "<value>" \n\n 5) vse88x.exe -c <ip/cidr> -u <domain\username> -p <password> -r "<value>"\n\n 6) vse88x.exe -c <ip> -u <domain\username> -p <password> -r <"value">\n\n- Registry Values:\n\n- DATVersion\n- Version\n- DatInstallDate\n- HotFixVersions\n- Uninstall Command\n- EngineVersion\n- DatDate\n- EngineInstallDate\n- Install Path\n- Installs CMA\n- Plugin Flag\n- Plugin Path\n- Software ID\n- McTrayAboutBoxDisplay\n- Enforce Flag\n- CLSID\n- Language\n- Product Name\n')
 	parser.add_option('-r', dest = 'regname', type ='string',help = 'registry key')
+	parser.add_option('--out', dest = 'output_file', type='string', help = 'output to file')
 	parser.add_option('-u', dest = 'uname', type='string',help='user name with domain or workgroup')
 	parser.add_option('-p', dest = 'upassword', type='string', help='user password')
 	parser.add_option('-s', dest = 'fromhost', type='string',help = 'target machine')
@@ -56,14 +57,22 @@ def main():
 	cidr_hosts = options.tocidrhost
 	sourcefile = options.sourcefile
 	destfile = options.destinationfile
+	outfile = options.output_file
+	
 	
 	if (value == None and tgtuser == None and tgtpass == None and from_host == None and to_host == None):
-			if (tgtuser == None or tgtpass == None or cidr_hosts == None):
+			if (tgtuser == None or tgtpass == None or cidr_hosts == None or outfile == None):
 						print parser.usage
 						sys.exit()
 	
-	connectwmi(from_host,to_host,tgtuser,tgtpass,value,cidr_hosts,sourcefile,destfile)
-				
+	connectwmi(from_host,to_host,tgtuser,tgtpass,value,cidr_hosts,sourcefile,destfile,outfile)
+
+def log_to_file(message): 
+	fd=open("vse_update_monitor.log","ab" )
+	fd.write("%s\r\n" % message)
+	fd.close()
+	return
+	
 def svcStatus( svc_name, machine=None):
 		return win32serviceutil.QueryServiceStatus( svc_name, machine)[1]
 
@@ -94,47 +103,66 @@ def wnet_connect(host, username, password):
 				return wnet_connect(host, username, password)
 			raise err
 
-def copy_file(ip,user,password,sourcefile,destfile):
+def copy_file(ip,user,password,sourcefile,destfile,outfile):
 		semaphore = threading.BoundedSemaphore()
 		semaphore.acquire()
 		wnet_connect(ip, user, password)
 		try:
 			shutil.copy2(sourcefile,'\\\\' + str(ip) + '\\' + str(destfile) + '\\')
 			print Fore.WHITE + '[*] file ' + Fore.YELLOW + sourcefile + Fore.WHITE + ' copied to C:\Program Files\Common Files\McAfee\%s' % destfile
+			if (outfile == "file"):
+				log_to_file('[*] file' + sourcefile + ' copied to C:\Program Files\Common Files\McAfee\%s' % destfile)
 		except:
 			print Fore.WHITE + '[*] file did not copied to C:\Program Files\Common Files\McAfee\%s. Check Permissions' % destfile
+			if (outfile == "file"):
+				log_to_file('[*] file did not copied to C:\Program Files\Common Files\McAfee\%s. Check Permissions' % destfile)
 		semaphore.release()	
 
-def unzip(DAT,ip,destfile):
+def unzip(DAT,ip,destfile,outfile):
 	semaphore = threading.BoundedSemaphore()
 	semaphore.acquire()
 	zipp = zipfile.ZipFile('\\\\' + str(ip) + '\\' + str(destfile) + '\\' + DAT)
 	zipp.extractall('\\\\' + str(ip) + '\\' + str(destfile) + '\\')
 	print Fore.WHITE + "[*] files have been extracted to C:\Program Files\Common Files\McAfee\%s" % destfile
+	if (outfile == "file"):
+		log_to_file("[*] files have been extracted to C:\Program Files\Common Files\McAfee\%s" % destfile)
 	print Fore.WHITE + "[*] new DAT has been installed.."
+	if (outfile == "file"):
+		log_to_file("[*] new DAT has been installed..")
 	semaphore.release()	
 	
-def deletefiles(ip,destfile,DAT):
+def deletefiles(ip,destfile,DAT,outfile):
 	semaphore = threading.BoundedSemaphore()
 	semaphore.acquire()
 	os.remove('\\\\' + str(ip) + '\\' + str(destfile) + '\\' + DAT)
 	os.remove('\\\\' + str(ip) + '\\' + str(destfile) + '\\' + "legal.txt")
 	print Fore.WHITE + "[*] cleaning unwanted files at C:\Program Files\Common Files\McAfee\%s" % destfile
+	if (outfile == "file"):
+		log_to_file("[*] cleaning unwanted files at C:\Program Files\Common Files\McAfee\%s" % destfile)
+	
 	semaphore.release()	
 	
-def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
+def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile,outfile):
 	if (cidr_hosts != None):
 		iprange = IPNetwork(cidr_hosts)
 	else:
 		iprange = IPRange(fromh, toh)
 	for ip in iprange:
 		print Fore.WHITE + "\n" + "[-] IP: %s" % ip + "\n"
+		if (outfile == "file"):
+			log_to_file("--------------------------------------------------")
+			log_to_file("\n" + "[-] IP: %s" % ip + "\n")
+			log_to_file("--------------------------------------------------\n")
 		try:
 			try:	
 				c = wmi.WMI(computer=ip, user=username, password=upass, namespace="root/default").StdRegProv
 				print "[*] Connected to host with IP: %s" % ip
+				if (outfile == "file"):
+					log_to_file("[*] Connected to host with IP: %s" % ip)
 			except:
 				print "[*] Not connected to host with IP address %s" % ip
+				if (outfile == "file"):
+					log_to_file("[*] Not connected to host with IP address %s" % ip)
 				continue
 			
 			if (value == 'DATVersion' and sourcefile != None and destfile != None and username != None and upass != None):
@@ -174,9 +202,12 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 							svcStop( "McAfeeFramework", unicode(ip))
 							print Fore.WHITE +"[*] Found installed DAT version " + Fore.YELLOW + "%s.0000" % valnum 
 							print Fore.WHITE +"[*] DAT "+ "latest version " + Fore.YELLOW + "%s.0000 " % DAT2val + Fore.WHITE + " uploded..."
-							copy_file(ip,username,upass,sourcefile,destfile)
-							unzip(DAT,ip,destfile)
-							deletefiles(ip,destfile,DAT)
+							if (outfile == "file"):
+								log_to_file("[*] Found installed DAT version %s.0000" % valnum)
+								log_to_file("[*] DAT "+ "latest version %s.0000 " % DAT2val + " uploded...")
+							copy_file(ip,username,upass,sourcefile,destfile,outfile)
+							unzip(DAT,ip,destfile,outfile)
+							deletefiles(ip,destfile,DAT,outfile)
 						else:
 							id_val=1
 							
@@ -205,25 +236,40 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 								
 								if(arch == 'x86'):
 									print "[*] updating registry.."
+									if (outfile == "file"):
+										log_to_file("[*] updating registry..")
 									result, = c.SetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName=r"SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value,sValue=str(DAT2val) + '.0000')
 									res,val = c.GetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
 									print "[*] registry updated succesfully"
+									if (outfile == "file"):
+										log_to_file("[*] registry updated succesfully")
 								else:
 									print "[*] updating registry.."
+									if (outfile == "file"):
+										log_to_file("[*] updating registry..")
 									result, = c.SetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName=r"SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value,sValue=str(DAT2val) + '.0000')
 									res,val = c.GetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
 									print "[*] registry updated succesfully"
-								print  Fore.WHITE + "[*] new current %s " % (value) + "is " + Fore.YELLOW +  "%s \n\n" % (val)
+									if (outfile == "file"):
+										log_to_file("[*] registry updated succesfully")
+								print  Fore.WHITE + "[*] new current %s " % (value) + "is %s \n\n" % (val)
+								if (outfile == "file"):
+									log_to_file("[*] new current %s " % (value) + "is %s \n\n" % (val))
 						elif id_val == 1:
 							print "[*] Registry cannot be updated. Please check McAfee services in case they are not both stopped.\n"
+							if (outfile == "file"):
+								log_to_file("[*] Registry cannot be updated. Please check McAfee services in case they are not both stopped.\n")
 				elif DAT2val <= valnum:
 					print Fore.WHITE + "[*] current %s " % (value) + "is " + Fore.YELLOW +  "%s \n\n" % (val)
-				
+					if (outfile == "file"):
+						log_to_file("[*] current %s " % (value) + "is %s \n\n" % (val))
 			elif(value == None and sourcefile != None and destfile != None):
 				try:
 					copy_file(ip,username,upass,sourcefile,destfile)
 				except:
 						print "[*] file didnt copied to destination %s" % destfile
+						if (outfile == "file"):
+							log_to_file("[*] file didnt copied to destination %s" % destfile)
 						
 			elif(value != None and sourcefile == None and destfile == None and username != None and upass != None):
 				n,arch = c.GetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName="SYSTEM\CurrentControlSet\Control\Session Manager\Environment",sValueName="PROCESSOR_ARCHITECTURE")
@@ -235,9 +281,13 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile):
 			
 			else:
 				print '[*] check registry values or source and destination file to copy'
-				
+				if (outfile == "file"):
+					log_to_file('[*] check registry values or source and destination file to copy')
+					
 		except win32service.error, (hr, fn, msg):
 			print "[*] Error starting service: %s" % msg
+			if (outfile == "file"):
+				log_to_file("[*] Error starting service: %s" % msg)
 			continue
 					
 if __name__ == '__main__':
