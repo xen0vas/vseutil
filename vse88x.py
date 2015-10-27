@@ -167,7 +167,7 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile,out
 						print "[*] Not connected to host with IP address %s" % ip + ".Probably the host is down or user is logged off"
 						if (outfile != None):
 							log_to_file("[*] Not connected to IP address %s" % ip + ".Probably the host is down or user is logged off",outfile)
-						pass
+						continue
 					
 					if (value == 'DATVersion' and sourcefile != None and destfile != None and username != None and upass != None):
 					
