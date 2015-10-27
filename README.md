@@ -28,7 +28,7 @@ Security engineers who want to keep VSE updated on endpoints when ePO is not fun
 
 ### Security Concerns 
 
-As shown at the previous image this tool can run only when no service protection is enabled. Because we dont want non-privileged end users to stop McAfee services from functioning, but we also want only one privileged user to be able to modify the services, we need to add this domain user at local security policy user rights management and then select act as part of the operating system, where we add the privileged domain user as shown at the following images. 
+As shown at the previous image this tool can run only when no service protection is enabled from VSE console. Because we dont want non-privileged users to stop McAfee services from functioning, but instead we only want privileged users to be able to modify the services, we must add privileged domain users at local security policy by selecting administrative tools located at control panel,then local security policy,then user rights assignment and then select "act as part of the operating system". The following images show the process. 
 
 - Administrative tools --> Local security policy 
 
