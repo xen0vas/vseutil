@@ -64,11 +64,14 @@ def main():
 			if (tgtuser == None or tgtpass == None or cidr_hosts == None or outfile == None):
 						print parser.usage
 						sys.exit()
-	
-	connectwmi(from_host,to_host,tgtuser,tgtpass,value,cidr_hosts,sourcefile,destfile,outfile)
-
-def log_to_file(message): 
-	fd=open("vse_update_monitor.log","ab" )
+	try:	
+		connectwmi(from_host,to_host,tgtuser,tgtpass,value,cidr_hosts,sourcefile,destfile,outfile)
+	except:
+		print " "
+		sys.exit()
+		
+def log_to_file(message,outfile): 
+	fd=open(outfile,"ab" )
 	fd.write("%s\r\n" % message)
 	fd.close()
 	return
@@ -110,12 +113,12 @@ def copy_file(ip,user,password,sourcefile,destfile,outfile):
 		try:
 			shutil.copy2(sourcefile,'\\\\' + str(ip) + '\\' + str(destfile) + '\\')
 			print Fore.WHITE + '[*] file ' + Fore.YELLOW + sourcefile + Fore.WHITE + ' copied to C:\Program Files\Common Files\McAfee\%s' % destfile
-			if (outfile == "file"):
-				log_to_file('[*] file' + sourcefile + ' copied to C:\Program Files\Common Files\McAfee\%s' % destfile)
+			if (outfile != None):
+				log_to_file('[*] file' + sourcefile + ' copied to C:\Program Files\Common Files\McAfee\%s' % destfile,outfile)
 		except:
 			print Fore.WHITE + '[*] file did not copied to C:\Program Files\Common Files\McAfee\%s. Check Permissions' % destfile
-			if (outfile == "file"):
-				log_to_file('[*] file did not copied to C:\Program Files\Common Files\McAfee\%s. Check Permissions' % destfile)
+			if (outfile != None):
+				log_to_file('[*] file did not copied to C:\Program Files\Common Files\McAfee\%s. Check Permissions' % destfile,outfile)
 		semaphore.release()	
 
 def unzip(DAT,ip,destfile,outfile):
@@ -124,11 +127,11 @@ def unzip(DAT,ip,destfile,outfile):
 	zipp = zipfile.ZipFile('\\\\' + str(ip) + '\\' + str(destfile) + '\\' + DAT)
 	zipp.extractall('\\\\' + str(ip) + '\\' + str(destfile) + '\\')
 	print Fore.WHITE + "[*] files have been extracted to C:\Program Files\Common Files\McAfee\%s" % destfile
-	if (outfile == "file"):
-		log_to_file("[*] files have been extracted to C:\Program Files\Common Files\McAfee\%s" % destfile)
+	if (outfile != None):
+		log_to_file("[*] files have been extracted to C:\Program Files\Common Files\McAfee\%s" % destfile,outfile)
 	print Fore.WHITE + "[*] new DAT has been installed.."
-	if (outfile == "file"):
-		log_to_file("[*] new DAT has been installed..")
+	if (outfile != None):
+		log_to_file("[*] new DAT has been installed..",outfile)
 	semaphore.release()	
 	
 def deletefiles(ip,destfile,DAT,outfile):
@@ -137,33 +140,39 @@ def deletefiles(ip,destfile,DAT,outfile):
 	os.remove('\\\\' + str(ip) + '\\' + str(destfile) + '\\' + DAT)
 	os.remove('\\\\' + str(ip) + '\\' + str(destfile) + '\\' + "legal.txt")
 	print Fore.WHITE + "[*] cleaning unwanted files at C:\Program Files\Common Files\McAfee\%s" % destfile
-	if (outfile == "file"):
-		log_to_file("[*] cleaning unwanted files at C:\Program Files\Common Files\McAfee\%s" % destfile)
+	if (outfile != None):
+		log_to_file("[*] cleaning unwanted files at C:\Program Files\Common Files\McAfee\%s" % destfile,outfile)
 	
 	semaphore.release()	
 	
 def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile,outfile):
-	if (cidr_hosts != None):
-		iprange = IPNetwork(cidr_hosts)
-	else:
-		iprange = IPRange(fromh, toh)
-	for ip in iprange:
-		print Fore.WHITE + "\n" + "[-] IP: %s" % ip + "\n"
-		if (outfile == "file"):
-			log_to_file("--------------------------------------------------")
-			log_to_file("\n" + "[-] IP: %s" % ip + "\n")
-			log_to_file("--------------------------------------------------\n")
+		try:
+			
+			if (cidr_hosts != None):
+				iprange = IPNetwork(cidr_hosts)
+			else:
+				iprange = IPRange(fromh, toh)
+			for ip in iprange:
+				print Fore.WHITE + "\n" + "[-] IP: %s" % ip + "\n"
+				if (outfile != None):
+					log_to_file("--------------------------------------------------",outfile)
+					log_to_file("\n" + "[-] IP: %s" % ip + "\n",outfile)
+					log_to_file("--------------------------------------------------\n",outfile)
+		except:
+			print Fore.WHITE + "\n[*] Invalid IP Network address"
+			sys.exit()
+			
 		try:
 			try:	
 				c = wmi.WMI(computer=ip, user=username, password=upass, namespace="root/default").StdRegProv
 				print "[*] Connected to host with IP: %s" % ip
-				if (outfile == "file"):
-					log_to_file("[*] Connected to host with IP: %s" % ip)
+				if (outfile != None):
+					log_to_file("[*] Connected to host with IP: %s" % ip,outfile)
 			except:
 				print "[*] Not connected to host with IP address %s" % ip + ".Probably the host is down or user is logged off"
-				if (outfile == "file"):
-					log_to_file("[*] Not connected to IP address %s" % ip + ".Probably the host is down or user is logged off")
-				continue
+				if (outfile != None):
+					log_to_file("[*] Not connected to IP address %s" % ip + ".Probably the host is down or user is logged off",outfile)
+				pass
 			
 			if (value == 'DATVersion' and sourcefile != None and destfile != None and username != None and upass != None):
 			
@@ -202,9 +211,9 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile,out
 							svcStop( "McAfeeFramework", unicode(ip))
 							print Fore.WHITE +"[*] Found installed DAT version " + Fore.YELLOW + "%s.0000" % valnum 
 							print Fore.WHITE +"[*] DAT "+ "latest version " + Fore.YELLOW + "%s.0000 " % DAT2val + Fore.WHITE + " uploded..."
-							if (outfile == "file"):
-								log_to_file("[*] Found installed DAT version %s.0000" % valnum)
-								log_to_file("[*] DAT "+ "latest version %s.0000 " % DAT2val + " uploded...")
+							if (outfile != None):
+								log_to_file("[*] Found installed DAT version %s.0000" % valnum,outfile)
+								log_to_file("[*] DAT "+ "latest version %s.0000 " % DAT2val + " uploded...",outfile)
 							copy_file(ip,username,upass,sourcefile,destfile,outfile)
 							unzip(DAT,ip,destfile,outfile)
 							deletefiles(ip,destfile,DAT,outfile)
@@ -236,40 +245,40 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile,out
 								
 								if(arch == 'x86'):
 									print "[*] updating registry.."
-									if (outfile == "file"):
-										log_to_file("[*] updating registry..")
+									if (outfile != None):
+										log_to_file("[*] updating registry..",outfile)
 									result, = c.SetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName=r"SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value,sValue=str(DAT2val) + '.0000')
 									res,val = c.GetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
 									print "[*] registry updated succesfully"
-									if (outfile == "file"):
-										log_to_file("[*] registry updated succesfully")
+									if (outfile != None):
+										log_to_file("[*] registry updated succesfully",outfile)
 								else:
 									print "[*] updating registry.."
-									if (outfile == "file"):
-										log_to_file("[*] updating registry..")
+									if (outfile != None):
+										log_to_file("[*] updating registry..",outfile)
 									result, = c.SetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName=r"SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value,sValue=str(DAT2val) + '.0000')
 									res,val = c.GetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
 									print "[*] registry updated succesfully"
-									if (outfile == "file"):
-										log_to_file("[*] registry updated succesfully")
+									if (outfile != None):
+										log_to_file("[*] registry updated succesfully",outfile)
 								print  Fore.WHITE + "[*] new current %s " % (value) + "is %s \n\n" % (val)
-								if (outfile == "file"):
-									log_to_file("[*] new current %s " % (value) + "is %s \n\n" % (val))
+								if (outfile != None):
+									log_to_file("[*] new current %s " % (value) + "is %s \n\n" % (val),outfile)
 						elif id_val == 1:
 							print "[*] Registry cannot be updated. Please check McAfee services in case they are not both stopped.\n"
-							if (outfile == "file"):
-								log_to_file("[*] Registry cannot be updated. Please check McAfee services in case they are not both stopped.\n")
+							if (outfile != None):
+								log_to_file("[*] Registry cannot be updated. Please check McAfee services in case they are not both stopped.\n",outfile)
 				elif DAT2val <= valnum:
 					print Fore.WHITE + "[*] current %s " % (value) + "is " + Fore.YELLOW +  "%s \n\n" % (val)
-					if (outfile == "file"):
-						log_to_file("[*] current %s " % (value) + "is %s \n\n" % (val))
+					if (outfile != None):
+						log_to_file("[*] current %s " % (value) + "is %s \n\n" % (val),outfile)
 			elif(value == None and sourcefile != None and destfile != None):
 				try:
 					copy_file(ip,username,upass,sourcefile,destfile)
 				except:
 						print "[*] file didnt copied to destination %s" % destfile
-						if (outfile == "file"):
-							log_to_file("[*] file didnt copied to destination %s" % destfile)
+						if (outfile != None):
+							log_to_file("[*] file didnt copied to destination %s" % destfile,outfile)
 						
 			elif(value != None and sourcefile == None and destfile == None and username != None and upass != None):
 				n,arch = c.GetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName="SYSTEM\CurrentControlSet\Control\Session Manager\Environment",sValueName="PROCESSOR_ARCHITECTURE")
@@ -281,14 +290,14 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile,out
 			
 			else:
 				print '[*] check registry values or source and destination file to copy'
-				if (outfile == "file"):
-					log_to_file('[*] check registry values or source and destination file to copy')
+				if (outfile != None):
+					log_to_file('[*] check registry values or source and destination file to copy',outfile)
 					
 		except win32service.error, (hr, fn, msg):
 			print "[*] Error starting service: %s" % msg
-			if (outfile == "file"):
-				log_to_file("[*] Error starting service: %s" % msg)
-			continue
+			if (outfile != None):
+				log_to_file("[*] Error starting service: %s" % msg,outfile)
+			pass
 					
 if __name__ == '__main__':
 	main()
