@@ -146,8 +146,7 @@ def deletefiles(ip,destfile,DAT,outfile):
 	semaphore.release()	
 	
 def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile,outfile):
-		try:
-			
+				
 			if (cidr_hosts != None):
 				iprange = IPNetwork(cidr_hosts)
 			else:
@@ -158,147 +157,143 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile,out
 					log_to_file("--------------------------------------------------",outfile)
 					log_to_file("\n" + "[-] IP: %s" % ip + "\n",outfile)
 					log_to_file("--------------------------------------------------\n",outfile)
-		except:
-			print Fore.WHITE + "\n[*] Invalid IP Network address"
-			sys.exit()
-			
-		try:
-			try:	
-				c = wmi.WMI(computer=ip, user=username, password=upass, namespace="root/default").StdRegProv
-				print "[*] Connected to host with IP: %s" % ip
-				if (outfile != None):
-					log_to_file("[*] Connected to host with IP: %s" % ip,outfile)
-			except:
-				print "[*] Not connected to host with IP address %s" % ip + ".Probably the host is down or user is logged off"
-				if (outfile != None):
-					log_to_file("[*] Not connected to IP address %s" % ip + ".Probably the host is down or user is logged off",outfile)
-				pass
-			
-			if (value == 'DATVersion' and sourcefile != None and destfile != None and username != None and upass != None):
-			
-				n,arch = c.GetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName="SYSTEM\CurrentControlSet\Control\Session Manager\Environment",sValueName="PROCESSOR_ARCHITECTURE")
-				if(arch == 'x86'):	
-					
-					res,val = c.GetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
-				else:
-					
-					res,val = c.GetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
-				
 				try:
-					uname=username.split('\\')
-					user=uname[-1]
-					domain=uname[0]
-				except:
-					user=username
-					domain=None
-						
-				splitval = val 
-				valsplit = splitval.split('.')
-				sourcefilesplit = sourcefile.split('\\')
-				DAT = sourcefilesplit[-1]
-				DATval = DAT.split('.')
-				valDAT = ''.join(DATval[0])
-				val2DAT = valDAT.split('-')
-				DAT2val = int(val2DAT[1])
-				valnum = int(valsplit[0])
-				
-				if DAT2val > valnum:				
-						status1 = svcStatus( "McShield", unicode(ip))
-						status2 = svcStatus( "McAfeeFramework", unicode(ip))
-						id_val = 0						
-						if status1 != STOPPED and status2 != STOPPED:
-							svcStop( "McShield", unicode(ip))
-							svcStop( "McAfeeFramework", unicode(ip))
-							print Fore.WHITE +"[*] Found installed DAT version " + Fore.YELLOW + "%s.0000" % valnum 
-							print Fore.WHITE +"[*] DAT "+ "latest version " + Fore.YELLOW + "%s.0000 " % DAT2val + Fore.WHITE + " uploded..."
-							if (outfile != None):
-								log_to_file("[*] Found installed DAT version %s.0000" % valnum,outfile)
-								log_to_file("[*] DAT "+ "latest version %s.0000 " % DAT2val + " uploded...",outfile)
-							copy_file(ip,username,upass,sourcefile,destfile,outfile)
-							unzip(DAT,ip,destfile,outfile)
-							deletefiles(ip,destfile,DAT,outfile)
-						else:
-							id_val=1
-							
-						if status1 == STOPPED and status2 != STOPPED:
-							arg="win32service.SERVICE_ALL_ACCESS"
-							svcStart( "McShield",arg, unicode(ip))
-												
-						if status1 != STOPPED and status2 == STOPPED:
-							arg="win32service.SERVICE_ALL_ACCESS"
-							svcStart( "McAfeeFramework",arg, unicode(ip))
-							
-							
-						status1 = svcStatus( "McShield", unicode(ip))
-						status2 = svcStatus( "McAfeeFramework", unicode(ip))
-						
-						if status1 == STOPPED and status2 == STOPPED:
-							arg="win32service.SERVICE_ALL_ACCESS"
-							svcStart( "McShield",arg, unicode(ip))	
-							svcStart( "McAfeeFramework",arg, unicode(ip))
-						
-						
-						status1 = svcStatus( "McShield", unicode(ip))
-						status2 = svcStatus( "McAfeeFramework", unicode(ip))
-						
-						if status1 != STOPPED and status2 != STOPPED and id_val != 1:	
-								
-								if(arch == 'x86'):
-									print "[*] updating registry.."
-									if (outfile != None):
-										log_to_file("[*] updating registry..",outfile)
-									result, = c.SetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName=r"SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value,sValue=str(DAT2val) + '.0000')
-									res,val = c.GetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
-									print "[*] registry updated succesfully"
-									if (outfile != None):
-										log_to_file("[*] registry updated succesfully",outfile)
-								else:
-									print "[*] updating registry.."
-									if (outfile != None):
-										log_to_file("[*] updating registry..",outfile)
-									result, = c.SetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName=r"SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value,sValue=str(DAT2val) + '.0000')
-									res,val = c.GetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
-									print "[*] registry updated succesfully"
-									if (outfile != None):
-										log_to_file("[*] registry updated succesfully",outfile)
-								print  Fore.WHITE + "[*] new current %s " % (value) + "is %s \n\n" % (val)
-								if (outfile != None):
-									log_to_file("[*] new current %s " % (value) + "is %s \n\n" % (val),outfile)
-						elif id_val == 1:
-							print "[*] Registry cannot be updated. Please check McAfee services in case they are not both stopped.\n"
-							if (outfile != None):
-								log_to_file("[*] Registry cannot be updated. Please check McAfee services in case they are not both stopped.\n",outfile)
-				elif DAT2val <= valnum:
-					print Fore.WHITE + "[*] current %s " % (value) + "is " + Fore.YELLOW +  "%s \n\n" % (val)
-					if (outfile != None):
-						log_to_file("[*] current %s " % (value) + "is %s \n\n" % (val),outfile)
-			elif(value == None and sourcefile != None and destfile != None):
-				try:
-					copy_file(ip,username,upass,sourcefile,destfile)
-				except:
-						print "[*] file didnt copied to destination %s" % destfile
+					try:	
+						c = wmi.WMI(computer=ip, user=username, password=upass, namespace="root/default").StdRegProv
+						print "[*] Connected to host with IP: %s" % ip
 						if (outfile != None):
-							log_to_file("[*] file didnt copied to destination %s" % destfile,outfile)
+							log_to_file("[*] Connected to host with IP: %s" % ip,outfile)
+					except:
+						print "[*] Not connected to host with IP address %s" % ip + ".Probably the host is down or user is logged off"
+						if (outfile != None):
+							log_to_file("[*] Not connected to IP address %s" % ip + ".Probably the host is down or user is logged off",outfile)
+						pass
+					
+					if (value == 'DATVersion' and sourcefile != None and destfile != None and username != None and upass != None):
+					
+						n,arch = c.GetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName="SYSTEM\CurrentControlSet\Control\Session Manager\Environment",sValueName="PROCESSOR_ARCHITECTURE")
+						if(arch == 'x86'):	
+							
+							res,val = c.GetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
+						else:
+							
+							res,val = c.GetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
 						
-			elif(value != None and sourcefile == None and destfile == None and username != None and upass != None):
-				n,arch = c.GetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName="SYSTEM\CurrentControlSet\Control\Session Manager\Environment",sValueName="PROCESSOR_ARCHITECTURE")
-				if(arch == 'x86'):	
-					res,val = c.GetStringValue(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
-				else:
-					res,val = c.GetStringValue(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
-				print  "[*] The %s " % (value) + "is " + Fore.YELLOW +  "%s \n\n" % (val)
-			
-			else:
-				print '[*] check registry values or source and destination file to copy'
-				if (outfile != None):
-					log_to_file('[*] check registry values or source and destination file to copy',outfile)
+						try:
+							uname=username.split('\\')
+							user=uname[-1]
+							domain=uname[0]
+						except:
+							user=username
+							domain=None
+								
+						splitval = val 
+						valsplit = splitval.split('.')
+						sourcefilesplit = sourcefile.split('\\')
+						DAT = sourcefilesplit[-1]
+						DATval = DAT.split('.')
+						valDAT = ''.join(DATval[0])
+						val2DAT = valDAT.split('-')
+						DAT2val = int(val2DAT[1])
+						valnum = int(valsplit[0])
+						
+						if DAT2val > valnum:				
+								status1 = svcStatus( "McShield", unicode(ip))
+								status2 = svcStatus( "McAfeeFramework", unicode(ip))
+								id_val = 0						
+								if status1 != STOPPED and status2 != STOPPED:
+									svcStop( "McShield", unicode(ip))
+									svcStop( "McAfeeFramework", unicode(ip))
+									print Fore.WHITE +"[*] Found installed DAT version " + Fore.YELLOW + "%s.0000" % valnum 
+									print Fore.WHITE +"[*] DAT "+ "latest version " + Fore.YELLOW + "%s.0000 " % DAT2val + Fore.WHITE + " uploded..."
+									if (outfile != None):
+										log_to_file("[*] Found installed DAT version %s.0000" % valnum,outfile)
+										log_to_file("[*] DAT "+ "latest version %s.0000 " % DAT2val + " uploded...",outfile)
+									copy_file(ip,username,upass,sourcefile,destfile,outfile)
+									unzip(DAT,ip,destfile,outfile)
+									deletefiles(ip,destfile,DAT,outfile)
+								else:
+									id_val=1
+									
+								if status1 == STOPPED and status2 != STOPPED:
+									arg="win32service.SERVICE_ALL_ACCESS"
+									svcStart( "McShield",arg, unicode(ip))
+														
+								if status1 != STOPPED and status2 == STOPPED:
+									arg="win32service.SERVICE_ALL_ACCESS"
+									svcStart( "McAfeeFramework",arg, unicode(ip))
+									
+									
+								status1 = svcStatus( "McShield", unicode(ip))
+								status2 = svcStatus( "McAfeeFramework", unicode(ip))
+									
+								if status1 == STOPPED and status2 == STOPPED:
+									arg="win32service.SERVICE_ALL_ACCESS"
+									svcStart( "McShield",arg, unicode(ip))	
+									svcStart( "McAfeeFramework",arg, unicode(ip))
+								
+									
+								status1 = svcStatus( "McShield", unicode(ip))
+								status2 = svcStatus( "McAfeeFramework", unicode(ip))
+									
+								if status1 != STOPPED and status2 != STOPPED and id_val != 1:	
+											
+										if(arch == 'x86'):
+											print "[*] updating registry.."
+											if (outfile != None):
+												log_to_file("[*] updating registry..",outfile)
+											result, = c.SetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName=r"SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value,sValue=str(DAT2val) + '.0000')
+											res,val = c.GetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
+											print "[*] registry updated succesfully"
+											if (outfile != None):
+												log_to_file("[*] registry updated succesfully",outfile)
+										else:
+											print "[*] updating registry.."
+											if (outfile != None):
+												log_to_file("[*] updating registry..",outfile)
+											result, = c.SetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName=r"SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value,sValue=str(DAT2val) + '.0000')
+											res,val = c.GetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
+											print "[*] registry updated succesfully"
+											if (outfile != None):
+												log_to_file("[*] registry updated succesfully",outfile)
+										print  Fore.WHITE + "[*] new current %s " % (value) + "is %s \n\n" % (val)
+										if (outfile != None):
+											log_to_file("[*] new current %s " % (value) + "is %s \n\n" % (val),outfile)
+								elif id_val == 1:
+									print "[*] Registry cannot be updated. Please check McAfee services in case they are not both stopped.\n"
+									if (outfile != None):
+										log_to_file("[*] Registry cannot be updated. Please check McAfee services in case they are not both stopped.\n",outfile)
+						elif DAT2val <= valnum:
+							print Fore.WHITE + "[*] current %s " % (value) + "is " + Fore.YELLOW +  "%s \n\n" % (val)
+							if (outfile != None):
+								log_to_file("[*] current %s " % (value) + "is %s \n\n" % (val),outfile)
+					elif(value == None and sourcefile != None and destfile != None):
+						try:
+							copy_file(ip,username,upass,sourcefile,destfile)
+						except:
+								print "[*] file didnt copied to destination %s" % destfile
+								if (outfile != None):
+									log_to_file("[*] file didnt copied to destination %s" % destfile,outfile)
+								
+					elif(value != None and sourcefile == None and destfile == None and username != None and upass != None):
+						n,arch = c.GetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName="SYSTEM\CurrentControlSet\Control\Session Manager\Environment",sValueName="PROCESSOR_ARCHITECTURE")
+						if(arch == 'x86'):	
+							res,val = c.GetStringValue(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
+						else:
+							res,val = c.GetStringValue(hDefKey=HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
+						print  "[*] The %s " % (value) + "is " + Fore.YELLOW +  "%s \n\n" % (val)
 					
-		except win32service.error, (hr, fn, msg):
-			print "[*] Error starting service: %s" % msg
-			if (outfile != None):
-				log_to_file("[*] Error starting service: %s" % msg,outfile)
-			pass
-					
+					else:
+						print '[*] check registry values or source and destination file to copy'
+						if (outfile != None):
+							log_to_file('[*] check registry values or source and destination file to copy',outfile)
+							
+				except win32service.error, (hr, fn, msg):
+					print "[*] Error starting service: %s" % msg
+					if (outfile != None):
+						log_to_file("[*] Error starting service: %s" % msg,outfile)
+					pass
+				
 if __name__ == '__main__':
 	main()
 	
