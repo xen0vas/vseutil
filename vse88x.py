@@ -64,11 +64,8 @@ def main():
 		if (tgtuser == None or tgtpass == None or cidr_hosts == None or outfile == None):
 			print parser.usage
 			sys.exit()
-	try:	
-		connectwmi(from_host,to_host,tgtuser,tgtpass,value,cidr_hosts,sourcefile,destfile,outfile)
-	except:
-		print " "
-		pass
+	
+	connectwmi(from_host,to_host,tgtuser,tgtpass,value,cidr_hosts,sourcefile,destfile,outfile)
 		
 def log_to_file(message,outfile): 
 	fd=open(outfile,"ab" )
@@ -106,21 +103,24 @@ def wnet_connect(host, username, password):
 				return wnet_connect(host, username, password)
 			raise err		
 
-def copy_file(ip,user,password,sourcefile,destfile,outfile):
+def copy_file(DAT2val,ip,user,password,sourcefile,destfile,outfile):
 	semaphore = threading.BoundedSemaphore()
 	semaphore.acquire()
 	wnet_connect(ip, user, password)
 	
 	try:
 		shutil.copy2(sourcefile,'\\\\' + str(ip) + '\\' + str(destfile) + '\\')
+		print Fore.WHITE +"[*] DAT "+ "latest version " + Fore.YELLOW + "%s.0000 " % DAT2val + Fore.WHITE + " uploded..."
+		if (outfile != None):
+			log_to_file("[*] DAT "+ "latest version %s.0000 " % DAT2val + " uploded...",outfile)
 		print Fore.WHITE + '[*] file ' + Fore.YELLOW + sourcefile + Fore.WHITE + ' copied to C:\Program Files\Common Files\McAfee\%s' % destfile
 		if (outfile != None):
 			log_to_file('[*] file' + sourcefile + ' copied to C:\Program Files\Common Files\McAfee\%s' % destfile,outfile)
 	except IOError, e:
 		if e.errno == 22:   				
-			print Fore.WHITE + '[*] file did not copied to C:\Program Files\Common Files\McAfee\%s. Check Permissions' % destfile
+			print Fore.WHITE + '[*] file did not copied to C:\Program Files\Common Files\McAfee\%s.' % destfile
 			if (outfile != None):
-				log_to_file('[*] file did not copied to C:\Program Files\Common Files\McAfee\%s. Check Permissions' % destfile,outfile)
+				log_to_file('[*] file did not copied to C:\Program Files\Common Files\McAfee\%s.' % destfile,outfile)
 	finally:
 		semaphore.release()	
 		return
@@ -233,38 +233,63 @@ def update_vse(DAT,ip,DAT2val,valnum,username,upass,sourcefile,destfile,outfile)
 		svcStop( "McShield", unicode(ip))
 		svcStop( "McAfeeFramework", unicode(ip))
 		print Fore.WHITE +"[*] Found installed DAT version " + Fore.YELLOW + "%s.0000" % valnum 
-		print Fore.WHITE +"[*] DAT "+ "latest version " + Fore.YELLOW + "%s.0000 " % DAT2val + Fore.WHITE + " uploded..."
+		
 		if (outfile != None):
 			log_to_file("[*] Found installed DAT version %s.0000" % valnum,outfile)
-			log_to_file("[*] DAT "+ "latest version %s.0000 " % DAT2val + " uploded...",outfile)
-		copy_file(ip,username,upass,sourcefile,destfile,outfile)
+			
+		copy_file(DAT2val,ip,username,upass,sourcefile,destfile,outfile)
 		unzip(DAT,ip,destfile,outfile)
 		deletefiles(ip,destfile,DAT,outfile)
-	else:
-		id_val=1
-		
-	if status1 == STOPPED and status2 != STOPPED:
+		id_val=5
+	
+	elif status1 == STOPPED and status2 != STOPPED:
 		arg="win32service.SERVICE_ALL_ACCESS"
+		print Fore.WHITE +"[*] Found installed DAT version " + Fore.YELLOW + "%s.0000" % valnum 
+		if (outfile != None):
+			log_to_file("[*] Found installed DAT version %s.0000" % valnum,outfile)
+		copy_file(DAT2val,ip,username,upass,sourcefile,destfile,outfile)
+		unzip(DAT,ip,destfile,outfile)
+		deletefiles(ip,destfile,DAT,outfile)
+		id_val=5
 		svcStart( "McShield",arg, unicode(ip))
 							
-	if status1 != STOPPED and status2 == STOPPED:
+	elif status1 != STOPPED and status2 == STOPPED:
 		arg="win32service.SERVICE_ALL_ACCESS"
+		svcStop( "McShield", unicode(ip))
+		print Fore.WHITE +"[*] Found installed DAT version " + Fore.YELLOW + "%s.0000" % valnum 
+		if (outfile != None):
+			log_to_file("[*] Found installed DAT version %s.0000" % valnum,outfile)
+		copy_file(DAT2val,ip,username,upass,sourcefile,destfile,outfile)
+		unzip(DAT,ip,destfile,outfile)
+		deletefiles(ip,destfile,DAT,outfile)
+		id_val=5
+		svcStart( "McShield",arg, unicode(ip))
 		svcStart( "McAfeeFramework",arg, unicode(ip))
-	status1 = svcStatus( "McShield", unicode(ip))
-	status2 = svcStatus( "McAfeeFramework", unicode(ip))
-	if status1 == STOPPED and status2 == STOPPED:
+		
+	elif status1 == STOPPED and status2 == STOPPED:
 		arg="win32service.SERVICE_ALL_ACCESS"
+		print Fore.WHITE +"[*] Found installed DAT version " + Fore.YELLOW + "%s.0000" % valnum 
+		if (outfile != None):
+			log_to_file("[*] Found installed DAT version %s.0000" % valnum,outfile)
+		copy_file(DAT2val,ip,username,upass,sourcefile,destfile,outfile)
+		unzip(DAT,ip,destfile,outfile)
+		deletefiles(ip,destfile,DAT,outfile)
+		id_val=5
 		svcStart( "McShield",arg, unicode(ip))	
 		svcStart( "McAfeeFramework",arg, unicode(ip))
+	else:
+		id_val=1
+	
 	status1 = svcStatus( "McShield", unicode(ip))
 	status2 = svcStatus( "McAfeeFramework", unicode(ip))
 	semaphore.release()
+	
 	return (status1,status2,id_val)
 
 def update_registry(status1,status2,id_val,arch,outfile,c,value,DAT2val):
 	semaphore = threading.BoundedSemaphore()
 	semaphore.acquire()
-	if status1 != STOPPED and status2 != STOPPED and id_val != 1:									
+	if status1 != STOPPED and status2 != STOPPED and id_val == 5:									
 		if(arch == 'x86'):
 			print "[*] updating registry.."
 			if (outfile != None):
@@ -286,10 +311,10 @@ def update_registry(status1,status2,id_val,arch,outfile,c,value,DAT2val):
 		print  Fore.WHITE + "[*] new current %s is" % (value) + Fore.YELLOW + " %s \n\n" % (val)
 		if (outfile != None):
 			log_to_file("[*] new current %s " % (value) + "is %s \n\n" % (val),outfile)
-	elif id_val == 1:
-		print "[*] Registry cannot be updated. Please check McAfee services in case they are not both stopped.\n"
+	elif id_val == 1 or id_val == 5:
+		print "[*] Registry cannot be updated. Please try again..\n"
 		if (outfile != None):
-			log_to_file("[*] Registry cannot be updated. Please check McAfee services in case they are not both stopped.\n",outfile)
+			log_to_file("[*] Registry cannot be updated. Please try again..\n",outfile)
 	semaphore.release()
 	
 def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile,outfile):
@@ -310,14 +335,18 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile,out
 				val,arch,DAT2val,valnum,DAT = registry_values(username,upass,value,sourcefile,destfile,c,outfile)
 				#user,domain = credentials(username,upass)
 				if (sourcefile != None or destfile != None):
-					if DAT2val > valnum and DAT2val != valnum:				
-						status1,status2,id_val = update_vse(DAT,ip,DAT2val,valnum,username,upass,sourcefile,destfile,outfile)
+					if DAT2val > valnum and DAT2val != valnum:
+						try:				
+							status1,status2,id_val = update_vse(DAT,ip,DAT2val,valnum,username,upass,sourcefile,destfile,outfile)
+						except:
+							print "[*] Cannot access services..check permissions"
+							continue
 						update_registry(status1,status2,id_val,arch,outfile,c,value,DAT2val)			
 						
 					elif DAT2val <= valnum:
-						print Fore.WHITE + "[*] current %s " % (value) + "is " + Fore.YELLOW +  "%s \n\n" % (val)
+						print Fore.WHITE + "[*] current %s " % (value) + "is " + Fore.YELLOW +  "%s " % (val)
 						if (outfile != None):
-							log_to_file("[*] current %s " % (value) + "is %s \n\n" % (val),outfile)
+							log_to_file("[*] current %s " % (value) + "is %s" % (val),outfile)
 											
 			else:
 				print "[*] Not connected to host with IP address %s" % ip + " Probably the host is down or user is logged off"
