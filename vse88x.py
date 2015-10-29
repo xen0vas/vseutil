@@ -240,6 +240,9 @@ def update_vse(DAT,ip,DAT2val,valnum,username,upass,sourcefile,destfile,outfile)
 		copy_file(DAT2val,ip,username,upass,sourcefile,destfile,outfile)
 		unzip(DAT,ip,destfile,outfile)
 		deletefiles(ip,destfile,DAT,outfile)
+		arg="win32service.SERVICE_ALL_ACCESS"
+		svcStart( "McShield",arg, unicode(ip))
+		svcStart( "McAfeeFramework",arg, unicode(ip))
 		id_val=5
 	
 	elif status1 == STOPPED and status2 != STOPPED:
@@ -311,7 +314,7 @@ def update_registry(status1,status2,id_val,arch,outfile,c,value,DAT2val):
 		print  Fore.WHITE + "[*] new current %s is" % (value) + Fore.YELLOW + " %s \n\n" % (val)
 		if (outfile != None):
 			log_to_file("[*] new current %s " % (value) + "is %s \n\n" % (val),outfile)
-	elif id_val == 1 or id_val == 5:
+	elif id_val == 1:
 		print "[*] Registry cannot be updated. Please try again..\n"
 		if (outfile != None):
 			log_to_file("[*] Registry cannot be updated. Please try again..\n",outfile)
