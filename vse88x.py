@@ -228,22 +228,20 @@ def update_vse(DAT,ip,DAT2val,valnum,username,upass,sourcefile,destfile,outfile)
 	semaphore.acquire()
 	status1 = svcStatus( "McShield", unicode(ip))
 	status2 = svcStatus( "McAfeeFramework", unicode(ip))
-	id_val = 0						
+	state_value = "not_passed"					
 	if status1 != STOPPED and status2 != STOPPED:
 		svcStop( "McShield", unicode(ip))
 		svcStop( "McAfeeFramework", unicode(ip))
 		print Fore.WHITE +"[*] Found installed DAT version " + Fore.YELLOW + "%s.0000" % valnum 
-		
 		if (outfile != None):
-			log_to_file("[*] Found installed DAT version %s.0000" % valnum,outfile)
-			
+			log_to_file("[*] Found installed DAT version %s.0000" % valnum,outfile)	
 		copy_file(DAT2val,ip,username,upass,sourcefile,destfile,outfile)
 		unzip(DAT,ip,destfile,outfile)
 		deletefiles(ip,destfile,DAT,outfile)
 		arg="win32service.SERVICE_ALL_ACCESS"
 		svcStart( "McShield",arg, unicode(ip))
 		svcStart( "McAfeeFramework",arg, unicode(ip))
-		id_val=5
+		state_value="passed"
 	
 	elif status1 == STOPPED and status2 != STOPPED:
 		arg="win32service.SERVICE_ALL_ACCESS"
@@ -252,9 +250,9 @@ def update_vse(DAT,ip,DAT2val,valnum,username,upass,sourcefile,destfile,outfile)
 			log_to_file("[*] Found installed DAT version %s.0000" % valnum,outfile)
 		copy_file(DAT2val,ip,username,upass,sourcefile,destfile,outfile)
 		unzip(DAT,ip,destfile,outfile)
-		deletefiles(ip,destfile,DAT,outfile)
-		id_val=5
+		deletefiles(ip,destfile,DAT,outfile)		
 		svcStart( "McShield",arg, unicode(ip))
+		state_value="passed"
 							
 	elif status1 != STOPPED and status2 == STOPPED:
 		arg="win32service.SERVICE_ALL_ACCESS"
@@ -265,9 +263,9 @@ def update_vse(DAT,ip,DAT2val,valnum,username,upass,sourcefile,destfile,outfile)
 		copy_file(DAT2val,ip,username,upass,sourcefile,destfile,outfile)
 		unzip(DAT,ip,destfile,outfile)
 		deletefiles(ip,destfile,DAT,outfile)
-		id_val=5
 		svcStart( "McShield",arg, unicode(ip))
 		svcStart( "McAfeeFramework",arg, unicode(ip))
+		state_value="passed"
 		
 	elif status1 == STOPPED and status2 == STOPPED:
 		arg="win32service.SERVICE_ALL_ACCESS"
@@ -276,23 +274,21 @@ def update_vse(DAT,ip,DAT2val,valnum,username,upass,sourcefile,destfile,outfile)
 			log_to_file("[*] Found installed DAT version %s.0000" % valnum,outfile)
 		copy_file(DAT2val,ip,username,upass,sourcefile,destfile,outfile)
 		unzip(DAT,ip,destfile,outfile)
-		deletefiles(ip,destfile,DAT,outfile)
-		id_val=5
+		deletefiles(ip,destfile,DAT,outfile)		
 		svcStart( "McShield",arg, unicode(ip))	
 		svcStart( "McAfeeFramework",arg, unicode(ip))
-	else:
-		id_val=1
+		state_value="passed"
 	
 	status1 = svcStatus( "McShield", unicode(ip))
 	status2 = svcStatus( "McAfeeFramework", unicode(ip))
 	semaphore.release()
 	
-	return (status1,status2,id_val)
+	return (status1,status2,state_value)
 
-def update_registry(status1,status2,id_val,arch,outfile,c,value,DAT2val):
+def update_registry(status1,status2,state_value,arch,outfile,c,value,DAT2val):
 	semaphore = threading.BoundedSemaphore()
 	semaphore.acquire()
-	if status1 != STOPPED and status2 != STOPPED and id_val == 5:									
+	if status1 != STOPPED and status2 != STOPPED and state_value == "passed":									
 		if(arch == 'x86'):
 			print "[*] updating registry.."
 			if (outfile != None):
@@ -314,7 +310,7 @@ def update_registry(status1,status2,id_val,arch,outfile,c,value,DAT2val):
 		print  Fore.WHITE + "[*] new current %s is" % (value) + Fore.YELLOW + " %s \n\n" % (val)
 		if (outfile != None):
 			log_to_file("[*] new current %s " % (value) + "is %s \n\n" % (val),outfile)
-	elif id_val == 1:
+	elif state_value == "not_passed":
 		print "[*] Registry cannot be updated. Please try again..\n"
 		if (outfile != None):
 			log_to_file("[*] Registry cannot be updated. Please try again..\n",outfile)
@@ -340,11 +336,11 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile,out
 				if (sourcefile != None or destfile != None):
 					if DAT2val > valnum and DAT2val != valnum:
 						try:				
-							status1,status2,id_val = update_vse(DAT,ip,DAT2val,valnum,username,upass,sourcefile,destfile,outfile)
+							status1,status2,state_value = update_vse(DAT,ip,DAT2val,valnum,username,upass,sourcefile,destfile,outfile)
 						except:
 							print "[*] Cannot access services..check permissions"
 							continue
-						update_registry(status1,status2,id_val,arch,outfile,c,value,DAT2val)			
+						update_registry(status1,status2,state_value,arch,outfile,c,value,DAT2val)			
 						
 					elif DAT2val <= valnum:
 						print Fore.WHITE + "[*] current %s " % (value) + "is " + Fore.YELLOW +  "%s " % (val)
