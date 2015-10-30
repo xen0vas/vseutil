@@ -25,7 +25,7 @@ Security engineers who want to keep VSE updated on endpoints when ePO is not fun
 - McAfee services McShield and McAfeeFramework must be allowed to be modified on target machines
 - Endpoints must alow WMI connections from privileged domain users to manipulate registry values
 - Privilleged domain users must be able to connect through SMB connections to endpoints that have VSE 8.8.x installed
-- Disable UAC
+- Disable UAC on endpoints 
 
 ### Security Concerns 
 
