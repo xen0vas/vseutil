@@ -46,6 +46,7 @@ def main():
 	parser.add_option('-c', dest = 'tocidrhost', type='string',help = 'cidr')
 	parser.add_option('--sf', dest = 'sourcefile', type='string',help = 'sourcedir/sourcefile')
 	parser.add_option('--df', dest = 'destinationfile', type='string',help = 'destdir/destfile')
+	parser.add_option('-d', dest = 'downgrade', type='string',help='downgrade DAT version')
 	
 	(options,args) = parser.parse_args()
 	
@@ -58,6 +59,7 @@ def main():
 	sourcefile = options.sourcefile
 	destfile = options.destinationfile
 	outfile = options.output_file
+	down = options.downgrade
 	
 	
 	if (value == None and tgtuser == None and tgtpass == None and from_host == None and to_host == None):
@@ -173,7 +175,7 @@ def registry_values(username,upass,value,sourcefile,destfile,c,outfile):
 			res,val = c.GetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
 		else:
 			res,val = c.GetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
-		DAT2val,valnum,DAT = string_mods(val,sourcefile)
+		DAT2val,valnum,DAT = string_convert(val,sourcefile)
 			
 	elif(value != None and sourcefile == None and destfile == None and username != None and upass != None):
 		DAT2val = None
