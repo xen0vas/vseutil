@@ -200,18 +200,8 @@ def registry_values(username,upass,value,sourcefile,destfile,c,outfile):
 			
 	return (val,arch,DAT2val,valnum,DAT)
 
-def credentials(username,upass):
-	try:
-		uname=username.split('\\')
-		user=uname[-1]
-		domain=uname[0]
-	except:
-		user=username
-		domain=None	
-		
-	return (user,domain)
-
-def string_mods(val,sourcefile):
+# This function converts and modifies strings 
+def string_convert(val,sourcefile):
 	splitval = val 
 	valsplit = splitval.split('.')
 	sourcefilesplit = sourcefile.split('\\')
@@ -223,6 +213,7 @@ def string_mods(val,sourcefile):
 	valnum = int(valsplit[0])
 	return (DAT2val,valnum,DAT)
 
+# This function updates DAT files inside the Engine file. It requires McShield and McAfeeFramework
 def update_vse(DAT,ip,DAT2val,valnum,username,upass,sourcefile,destfile,outfile):
 	semaphore = threading.BoundedSemaphore()
 	semaphore.acquire()
@@ -285,6 +276,7 @@ def update_vse(DAT,ip,DAT2val,valnum,username,upass,sourcefile,destfile,outfile)
 	
 	return (status1,status2,state_value)
 
+#This function updates registry values only when Engine folder has been updated 
 def update_registry(status1,status2,state_value,arch,outfile,c,value,DAT2val):
 	semaphore = threading.BoundedSemaphore()
 	semaphore.acquire()
