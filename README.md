@@ -6,7 +6,7 @@ vseutil is a tool which performs the following
 - Copy latest DAT file to target machine and executes the DAT in order to keep VSE 8.8.x antivirus updated
 - Runs on 32bit as well as 64bit Windows OS
 
-The vse88x script developed based on the following article which describes the steps to update VSE 8.8.x DAT files on endpoints machines manually
+The vseutil script developed based on the following article which describes the steps to update VSE 8.8.x DAT files on endpoints machines manually
 
 https://kc.mcafee.com/corporate/index?page=content&id=KB51679
 
@@ -92,33 +92,33 @@ As shown at the previous image this tool can run only when no service protection
 
 ### Create windows executable
 
-```python pyinstaller.py --onefile vse88x.py```
+```python pyinstaller.py --onefile vseutil.py```
 
 ### How to run it 
 
 1) Update VSE on a range of machines in subnet
 
-```vse88x.exe -s from_ip -t to_ip -u DOMAIN\user -p password --sf src_file --df Share_folder_name -r "value"```
+```vseutil.exe -s from_ip -t to_ip -u DOMAIN\user -p password --sf src_file --df Share_folder_name -r "value"```
 
 2) Update VSE on a single machine
 
-```vse88x.exe -c target_ip -u DOMAIN\user -p password --sf src_file --df Share_folder_name -r "value"```
+```vseutil.exe -c target_ip -u DOMAIN\user -p password --sf src_file --df Share_folder_name -r "value"```
 
 3) Update VSE on a range of machines in a subnet using cidr
 
-```vse88x.exe -c ip/cidr -u DOMAIN\user -p password --sf src_file --df Share_folder_name -r "value"```
+```vseutil.exe -c ip/cidr -u DOMAIN\user -p password --sf src_file --df Share_folder_name -r "value"```
 
 4) Show registry values on a range of machines in a subnet
 
-```vse88x.exe -s from_ip -t to_ip -u DOMAIN\user -p password -r "value"```
+```vseutil.exe -s from_ip -t to_ip -u DOMAIN\user -p password -r "value"```
 
 5) Show registry value on a range of machines in a subnet using cidr 
 
-```vse88x.exe -c ip/cidr -u DOMAIN\user -p password -r "value"```
+```vseutil.exe -c ip/cidr -u DOMAIN\user -p password -r "value"```
 
 6) Show registry value on a single machine
 
-```vse88x.exe -c ip -u DOMAIN\user -p password -r "value"```
+```vseutil.exe -c ip -u DOMAIN\user -p password -r "value"```
 
 ### Execution example
 
