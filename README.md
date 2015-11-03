@@ -16,7 +16,7 @@ https://kc.mcafee.com/corporate/index?page=content&id=KB51679
 
 ### Who need this
 
-Security engineers who want to keep VSE updated on endpoints when ePO is not functioning correctly.
+Security engineers who want to keep VSE updated on endpoints when ePO agent does not communicating correctly.
 
 ### Prerequisites
 
