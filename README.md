@@ -5,6 +5,7 @@ vseutil tool performs the following
 - Scan networks and single machines and reads McAfee VSE 8.8.x windows registry values
 - Copy latest DAT file to target machine and executes the DAT in order to keep VSE 8.8.x antivirus updated
 - Runs on 32bit as well as 64bit Windows OS
+- Works only with VSE 8.8.x (future versions of vseutil will include every version of VSE)
 
 The vseutil script developed based on the following article which describes the steps to update VSE 8.8.x DAT files on endpoints machines manually
 
