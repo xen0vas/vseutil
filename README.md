@@ -1,6 +1,6 @@
 # vseutil
 
-vseutil is a tool which performs the following
+vseutil tool performs the following
 
 - Scan networks and single machines and reads McAfee VSE 8.8.x windows registry values
 - Copy latest DAT file to target machine and executes the DAT in order to keep VSE 8.8.x antivirus updated
