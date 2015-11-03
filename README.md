@@ -76,15 +76,16 @@ As shown at the previous image this tool can run only when no service protection
 
 ### Script Options 
 
-- ```-c```    use this option to specify IP address as well as range of addresses using cidr
-- ```--sf```    use this option to specify the source file that will be copied to target machine
-- ```--df```    use this option to specify the destination that the file will be copied
-- ```-r```     use this option to specify the registry value you want to review 
-- ```-u```     use this option to specify username 
-- ```-p```     use this option to specify password
-- ```-s```     use this option to specify the first IP address to check
-- ```-t```    use this option to specify the last IP address to check
-- ```--out``` use this option to save the output into a log file
+- ```-c```    	use this option to specify IP address as well as range of addresses using cidr
+- ```--sf```    	use this option to specify the source file that will be copied to target machine
+- ```--df```    	use this option to specify the destination that the file will be copied
+- ```-r```     	use this option to specify the registry value you want to review 
+- ```-u```     	use this option to specify username 
+- ```-p```     	use this option to specify password
+- ```-s```     	use this option to specify the first IP address to check
+- ```-t```    	use this option to specify the last IP address to check
+- ```--out```		use this option to save the output into a log file --> e.g. '--out vse.log' or vse.csv
+- ```-d down```	use this option if you want to downgrade the DAT version 
 
 ### How to allow mcafee services modifications
 
