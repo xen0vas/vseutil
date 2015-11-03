@@ -37,32 +37,14 @@ init()
 def main():
 	
 	parser = optparse.OptionParser('\n\nAuthor: Xenofon Vassilakopoulos (@xvass) \n\n\
-	[-] Usage: \n\n 1) vse88x.exe  -s <from_target> -t <to_target> -u <domain\username> -p <password> -r "<value>"\n\n \
-	2) vse88x.exe -c target_ip -u <domain\username> -p <password> --sf <src_file> --df <share_folder> -r "<value>" \n\n \
-	3) vse88x.exe -s <from_target> -t <to_target> -u <domain\username> -p <password> --sf <src_file> --df <share_folder> -r "<value>"\n\n \
-	4) vse88x.exe -c <ip/cidr> -u <domain\username> -p <password> --sf <src_file> --df <share_folder> -r "<value>" \n\n \
-	5) vse88x.exe -c <ip/cidr> -u <domain\username> -p <password> -r "<value>"\n\n \
-	6) vse88x.exe -c <ip> -u <domain\username> -p <password> -r <"value">\n\n- \
-	Registry Values:\n\n- \
-	DATVersion\n- \
-	Version\n- \
-	DatInstallDate\n- \
-	HotFixVersions\n- \
-	Uninstall Command\n- \
-	EngineVersion\n- \
-	DatDate\n- \
-	EngineInstallDate\n- \
-	Install Path\n- \
-	Installs CMA\n- \
-	Plugin Flag\n- \
-	Plugin Path\n- \
-	Software \
-	ID\n- \
-	McTrayAboutBoxDisplay\n- \
-	Enforce Flag\n- \
-	CLSID\n- \
-	Language\n- \
-	Product Name\n')
+	[-] Usage: \n\n\
+	1) vseutil.exe  -s <from_target> -t <to_target> -u <domain\username> -p <password> -r "<value>"\n\n\
+	2) vseutil.exe -c target_ip -u <domain\username> -p <password> --sf <src_file> --df <share_folder> -r "<value>" \n\n\
+	3) vseutil.exe -s <from_target> -t <to_target> -u <domain\username> -p <password> --sf <src_file> --df <share_folder> -r "<value>"\n\n\
+	4) vseutil.exe -c <ip/cidr> -u <domain\username> -p <password> --sf <src_file> --df <share_folder> -r "<value>" \n\n\
+	5) vseutil.exe -c <ip/cidr> -u <domain\username> -p <password> -r "<value>"\n\n\
+	6) vseutil.exe -c <ip> -u <domain\username> -p <password> -r "<value>"\n\n\
+	[*] Use vseutil.exe --help to see options and registries\n\n')
 	
 	
 	parser.add_option('-r', dest = 'regname', type ='string',help = 'registry key')
@@ -77,6 +59,7 @@ def main():
 	parser.add_option('--hlp', dest = 'help', type='string',help='show options and registry keys')
 	parser.add_option('-l', dest = 'localhost', type='string',help='run into local host')
 	parser.add_option('-d', "--down", dest = 'down', type='string',help='downgrade DAT')
+	
 	
 	(options,args) = parser.parse_args()
 	
@@ -93,6 +76,9 @@ def main():
 	local = options.localhost
 	down = options.down
 	
+	if hlp=="help":
+		helpinfo()
+		sys.exit()
 	
 	if (value == None and tgtuser == None and tgtpass == None and from_host == None and to_host == None):
 		if (tgtuser == None or tgtpass == None or cidr_hosts == None or outfile == None):
@@ -106,7 +92,41 @@ def log_to_file(message,outfile):
 	fd.write("%s\r\n" % message)
 	fd.close()
 	return
-	
+
+
+def helpinfo():
+	print '\n\n\
+	[*] Options:\n\n\
+	-c 		:- use this option to specify IP address as well as range of addresses using cidr\n\
+	--sf 		:- use this option to specify the source file that will be copied to target machine\n\
+	--df 		:- use this option to specify the destination that the file will be copied\n\
+	-r 		:- use this option to specify the registry value you want to review\n\
+	-u 		:- use this option to specify username\n\
+	-p 		:- use this option to specify password\n\
+	-s 		:- use this option to specify the first IP address to check\n\
+	-t 		:- use this option to specify the last IP address to check\n\
+	--out 		:- use this option to save the output into a log file --> e.g. "--out vse.log" or vse.csv\n\
+	-d down 	:- use this option if you want to downgrade the DAT version\n\n\
+	[*] Registry Values:\n\n\
+	- DATVersion\n\
+	- Version\n\
+	- DatInstallDate\n\
+	- HotFixVersions\n\
+	- Uninstall Command\n\
+	- EngineVersion\n\
+	- DatDate\n\
+	- EngineInstallDate\n\
+	- Install Path\n\
+	- Installs CMA\n\
+	- Plugin Flag\n\
+	- Plugin Path\n\
+	- Software ID\n\
+	- McTrayAboutBoxDisplay\n\
+	- Enforce Flag\n\
+	- CLSID\n\
+	- Language\n\
+	- Product Name\n'
+		
 def svcStatus( svc_name, machine=None):
 		return win32serviceutil.QueryServiceStatus( svc_name, machine)[1]
 
@@ -338,7 +358,7 @@ def update_registry(status1,status2,state_value,arch,outfile,c,value,DAT2val):
 			if (outfile != None):
 				log_to_file("[*] registry updated successfully",outfile)
 		print  Fore.WHITE + "[*] new current %s is" % (value) + Fore.YELLOW + " %s " % (val)
-		print "[*] Exiting...\n"
+		print Fore.WHITE + "[*] Exiting...\n"
 		if (outfile != None):
 			log_to_file("[*] new current %s " % (value) + "is %s \n\n" % (val),outfile)
 	elif state_value == "not_passed":
@@ -350,20 +370,25 @@ def update_registry(status1,status2,state_value,arch,outfile,c,value,DAT2val):
 def changeDATversion(DAT,ip,DAT2val,valnum,username,upass,sourcefile,destfile,outfile,arch,c,value,val,level):
 	semaphore = threading.BoundedSemaphore()
 	semaphore.acquire()
-	if DAT2val != valnum and level=="down":
-		status1,status2,state_value = update_vse(DAT,ip,DAT2val,valnum,username,upass,sourcefile,destfile,outfile)
-		update_registry(status1,status2,state_value,arch,outfile,c,value,DAT2val)
-	elif DAT2val != valnum and level == None and DAT2val > valnum:
-		status1,status2,state_value = update_vse(DAT,ip,DAT2val,valnum,username,upass,sourcefile,destfile,outfile)
-		update_registry(status1,status2,state_value,arch,outfile,c,value,DAT2val)
-	elif DAT2val == valnum or (DAT2val < valnum and level==None):
-		print Fore.WHITE + "[*] current %s " % (value) + "is " + Fore.YELLOW +  "%s " % (val)
-		if (DAT2val < valnum):
-			print "[*] You are trying to install a lower DAT version..Use option '-d down' to downgrade.."
-		print "[*] Exiting..."
+	try:
+		if DAT2val != valnum and level=="down":
+			status1,status2,state_value = update_vse(DAT,ip,DAT2val,valnum,username,upass,sourcefile,destfile,outfile)
+			update_registry(status1,status2,state_value,arch,outfile,c,value,DAT2val)
+		elif DAT2val != valnum and level == None and DAT2val > valnum:
+			status1,status2,state_value = update_vse(DAT,ip,DAT2val,valnum,username,upass,sourcefile,destfile,outfile)
+			update_registry(status1,status2,state_value,arch,outfile,c,value,DAT2val)
+		elif DAT2val == valnum or (DAT2val < valnum and level==None):
+			print Fore.WHITE + "[*] current %s " % (value) + "is " + Fore.YELLOW +  "%s " % (val)
+			if (DAT2val < valnum):
+				print "[*] You are trying to install a lower DAT version..Use option '-d down' to downgrade.."
+			print Fore.WHITE + "[*] Exiting..."
+			if (outfile != None):
+				log_to_file("[*] current %s " % (value) + "is %s" % (val),outfile)
+				log_to_file("[*] Exiting...",outfile)
+	except:
+		print Fore.RED + "[*] Check if DAT version you are trying to install exists.."
 		if (outfile != None):
-			log_to_file("[*] current %s " % (value) + "is %s" % (val),outfile)
-			log_to_file("[*] Exiting...",outfile)
+			log_to_file("[*] Check if DAT version you are trying to install exists..",outfile)
 	semaphore.release()
 	return
 
@@ -386,8 +411,8 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile,out
 					try:						
 						changeDATversion(DAT,ip,DAT2val,valnum,username,upass,sourcefile,destfile,outfile,arch,c,value,val,level)										
 					except:
-						print "[*] Cannot access services..check permissions"
-						print "[*] Exiting..."
+						print Fore.RED + "[*] Cannot access services..check permissions"
+						print Fore.WHITE + "[*] Exiting..."
 						continue
 			else:
 				print "[*] Not connected to host with IP address %s" % ip + " Probably the host is down or user is logged off"
