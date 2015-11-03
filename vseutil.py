@@ -44,7 +44,7 @@ def main():
 	4) vseutil.exe -c <ip/cidr> -u <domain\username> -p <password> --sf <src_file> --df <share_folder> -r "<value>" \n\n\
 	5) vseutil.exe -c <ip/cidr> -u <domain\username> -p <password> -r "<value>"\n\n\
 	6) vseutil.exe -c <ip> -u <domain\username> -p <password> -r "<value>"\n\n\
-	[*] Use vseutil.exe --help to see options and registries\n\n')
+	[*] Use vseutil.exe --hlp help to see options and registry values to use\n\n')
 	
 	
 	parser.add_option('-r', dest = 'regname', type ='string',help = 'registry key')
