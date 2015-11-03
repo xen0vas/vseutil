@@ -89,7 +89,7 @@ def main():
 	sourcefile = options.sourcefile
 	destfile = options.destinationfile
 	outfile = options.output_file
-	help = options.help
+	hlp = options.help
 	local = options.localhost
 	down = options.down
 	
