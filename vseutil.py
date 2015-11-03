@@ -76,7 +76,7 @@ def main():
 	parser.add_option('--df', dest = 'destinationfile', type='string',help = 'destdir/destfile')
 	parser.add_option('--hlp', dest = 'help', type='string',help='show options and registry keys')
 	parser.add_option('-l', dest = 'localhost', type='string',help='run into local host')
-	parser.add_option('-d', dest = 'down', type='string',help='downgrade DAT')
+	parser.add_option('-d', "--down", dest = 'down', type='string',help='downgrade DAT')
 	
 	(options,args) = parser.parse_args()
 	
