@@ -51,9 +51,13 @@ As shown at the previous image this tool can run only when no service protection
 ### Running script without any arguments
 
  - Running the script without arguments gives the following
-
-![vse88](https://cloud.githubusercontent.com/assets/12726776/10715882/a0cc5ab6-7b2e-11e5-9ef0-d098d66b2553.PNG)
  
+![unique](https://cloud.githubusercontent.com/assets/12726776/10911943/d6b9f5f2-824f-11e5-9bd4-8de7ffa8abcf.PNG)
+
+### Running the script using --hlp help as argument gives the following output
+
+![help](https://cloud.githubusercontent.com/assets/12726776/10912041/59e88d76-8250-11e5-952b-85f05abbdc98.PNG)
+
 #####Registry Values:
 
 - DATVersion
@@ -124,6 +128,5 @@ As shown at the previous image this tool can run only when no service protection
 
 ### Execution example
 
-![capture](https://cloud.githubusercontent.com/assets/12726776/10736731/355f15d6-7c17-11e5-88cb-8b32b1e930c4.PNG)
-
+![execution](https://cloud.githubusercontent.com/assets/12726776/10912348/bd72d760-8251-11e5-937b-d6c66e5b5652.PNG)
 
