@@ -39,8 +39,7 @@ def main():
 	parser = optparse.OptionParser('\n\nAuthor: Xenofon Vassilakopoulos (@xvass) \n\n\
 	[-] Usage: \n\n\
 		vseutil.exe  [options] \n\n\
-	[!] Use vseutil.exe --hlp to see options and registry values to use\n\n')
-	
+	[!] Use vseutil.exe --hlp to see options and registry values to use\n\n')	
 	
 	parser.add_option('-r', dest = 'regname', type ='string',help = 'registry key')
 	parser.add_option('--out', dest = 'output_file', type='string', help = 'output to file')
@@ -54,8 +53,7 @@ def main():
 	parser.add_option('--hlp', action='store_const', dest = 'hlp', const='help')
 	parser.add_option('-l','--local', dest = 'localhost',action='store_const', const='local')
 	parser.add_option('-d', "--down", action='store_const', const='down', dest='down')
-	
-	
+		
 	(options,args) = parser.parse_args()
 	
 	value = options.regname
@@ -87,7 +85,6 @@ def log_to_file(message,outfile):
 	fd.write("%s\r\n" % message)
 	fd.close()
 	return
-
 
 def helpinfo():
 	print '\n\n\
@@ -253,8 +250,7 @@ def registry_values(username,upass,value,sourcefile,destfile,c,outfile):
 		arch = None
 		print '[!] check registry values, source and destination'
 		if (outfile != None):
-			log_to_file('[!] check registry values, source and destination',outfile)
-			
+			log_to_file('[!] check registry values, source and destination',outfile)			
 	return (val,arch,DAT2val,valnum,DAT)
 
 # This function converts and modifies strings carrying DAT lexical format 
@@ -397,7 +393,7 @@ def changeDATversion(DAT,ip,DAT2val,valnum,username,upass,sourcefile,destfile,ou
 		elif DAT2val == valnum or (DAT2val < valnum and level==None):
 			print Fore.WHITE + "[*] current %s " % (value) + "is " + Fore.YELLOW +  "%s " % (val)
 			if (DAT2val < valnum):
-				print Fore.WHITE + "[!] You are trying to install a lower DAT version..Use option '-d down' to downgrade.."
+				print Fore.WHITE + "[!] You are trying to install a lower DAT version..Use option '-d' to downgrade version.."
 			print Fore.WHITE + "[*] Exiting..."
 			if (outfile != None):
 				log_to_file("[*] current %s " % (value) + "is %s" % (val),outfile)
