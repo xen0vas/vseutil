@@ -52,11 +52,11 @@ As shown at the previous image this tool can run only when no service protection
 
  - Running the script without arguments gives the following
  
-![unique](https://cloud.githubusercontent.com/assets/12726776/10911943/d6b9f5f2-824f-11e5-9bd4-8de7ffa8abcf.PNG)
+![vse_help](https://cloud.githubusercontent.com/assets/12726776/10962257/8be8e69a-839f-11e5-8cd0-700d7c924219.PNG)
 
 ### Running the script using --hlp help as argument gives the following output
 
-![help](https://cloud.githubusercontent.com/assets/12726776/10912041/59e88d76-8250-11e5-952b-85f05abbdc98.PNG)
+![help](https://cloud.githubusercontent.com/assets/12726776/10962291/cad613a0-839f-11e5-8fe0-c88851063396.PNG)
 
 #####Registry Values:
 
