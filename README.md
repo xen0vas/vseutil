@@ -128,11 +128,11 @@ As shown at the previous image this tool can run only when no service protection
 
 7) Execute vseutil.exe and save the output into a file 
 
-```vseutil.exe -c ip -u DOMAIN\user -p password -r "value" --out vse.log```
+```vseutil.exe -c ip -u DOMAIN\user -p password --sf src_file --df Share_folder_name -r "value" --out vse.log```
 
 8) Execute vseutil.exe and downgrade the DAT version on endpoints as well as save the output into a log file
 
-```vseutil.exe -c ip -u DOMAIN\user -p password -r "value" --out vse.log -d```
+```vseutil.exe -c ip -u DOMAIN\user -p password --sf src_file --df Share_folder_name -r "value" --out vse.log -d```
 
 ### Execution example
 
