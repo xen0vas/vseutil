@@ -38,13 +38,8 @@ def main():
 	
 	parser = optparse.OptionParser('\n\nAuthor: Xenofon Vassilakopoulos (@xvass) \n\n\
 	[-] Usage: \n\n\
-	1) vseutil.exe  -s <from_target> -t <to_target> -u <domain\username> -p <password> -r "<value>"\n\n\
-	2) vseutil.exe -c target_ip -u <domain\username> -p <password> --sf <src_file> --df <share_folder> -r "<value>" \n\n\
-	3) vseutil.exe -s <from_target> -t <to_target> -u <domain\username> -p <password> --sf <src_file> --df <share_folder> -r "<value>"\n\n\
-	4) vseutil.exe -c <ip/cidr> -u <domain\username> -p <password> --sf <src_file> --df <share_folder> -r "<value>" \n\n\
-	5) vseutil.exe -c <ip/cidr> -u <domain\username> -p <password> -r "<value>"\n\n\
-	6) vseutil.exe -c <ip> -u <domain\username> -p <password> -r "<value>"\n\n\
-	[*] Use vseutil.exe --hlp help to see options and registry values to use\n\n')
+	vseutil.exe  [options] \n\n\
+	[!] Use vseutil.exe --hlp to see options and registry values to use\n\n')
 	
 	
 	parser.add_option('-r', dest = 'regname', type ='string',help = 'registry key')
@@ -56,9 +51,9 @@ def main():
 	parser.add_option('-c', dest = 'tocidrhost', type='string',help = 'cidr')
 	parser.add_option('--sf', dest = 'sourcefile', type='string',help = 'sourcedir/sourcefile')
 	parser.add_option('--df', dest = 'destinationfile', type='string',help = 'destdir/destfile')
-	parser.add_option('--hlp', dest = 'help', type='string',help='show options and registry keys')
-	parser.add_option('-l', dest = 'localhost', type='string',help='run into local host')
-	parser.add_option('-d', "--down", dest = 'down', type='string',help='downgrade DAT')
+	parser.add_option('--hlp', action='store_const', dest = 'hlp', const='help')
+	parser.add_option('-l','--local', dest = 'localhost',action='store_const', const='local')
+	parser.add_option('-d', "--down", action='store_const', const='down', dest='down')
 	
 	
 	(options,args) = parser.parse_args()
@@ -72,7 +67,7 @@ def main():
 	sourcefile = options.sourcefile
 	destfile = options.destinationfile
 	outfile = options.output_file
-	hlp = options.help
+	hlp = options.hlp
 	local = options.localhost
 	down = options.down
 	
@@ -106,7 +101,7 @@ def helpinfo():
 	-s 		:- use this option to specify the first IP address to check\n\
 	-t 		:- use this option to specify the last IP address to check\n\
 	--out 		:- use this option to save the output into a log file --> e.g. "--out vse.log" or vse.csv\n\
-	-d down 	:- use this option if you want to downgrade the DAT version\n\n\
+	-d	 	:- use this option if you want to downgrade the DAT version\n\n\
 	[*] Registry Values:\n\n\
 	- DATVersion\n\
 	- Version\n\
@@ -380,7 +375,7 @@ def changeDATversion(DAT,ip,DAT2val,valnum,username,upass,sourcefile,destfile,ou
 		elif DAT2val == valnum or (DAT2val < valnum and level==None):
 			print Fore.WHITE + "[*] current %s " % (value) + "is " + Fore.YELLOW +  "%s " % (val)
 			if (DAT2val < valnum):
-				print "[*] You are trying to install a lower DAT version..Use option '-d down' to downgrade.."
+				print Fore.WHITE + "[*] You are trying to install a lower DAT version..Use option '-d down' to downgrade.."
 			print Fore.WHITE + "[*] Exiting..."
 			if (outfile != None):
 				log_to_file("[*] current %s " % (value) + "is %s" % (val),outfile)

@@ -90,7 +90,7 @@ As shown at the previous image this tool can run only when no service protection
 - ```-s```     	use this option to specify the first IP address to check
 - ```-t```    	use this option to specify the last IP address to check
 - ```--out```		use this option to save the output into a log file --> e.g. '--out vse.log' or vse.csv
-- ```-d down```	use this option if you want to downgrade the DAT version 
+- ```-d```		use this option if you want to downgrade the DAT version 
 
 ### How to allow mcafee services modifications
 
@@ -125,6 +125,14 @@ As shown at the previous image this tool can run only when no service protection
 6) Show registry value on a single machine
 
 ```vseutil.exe -c ip -u DOMAIN\user -p password -r "value"```
+
+7) Execute vseutil.exe and save the output into a file 
+
+```vseutil.exe -c ip -u DOMAIN\user -p password -r "value" --out vse.log```
+
+8) Execute vseutil.exe and downgrade the DAT version on endpoints as well as save the output into a log file
+
+```vseutil.exe -c ip -u DOMAIN\user -p password -r "value" --out vse.log -d```
 
 ### Execution example
 
