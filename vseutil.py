@@ -24,7 +24,7 @@ import win32api
 import win32con
 import win32service
 import win32serviceutil
-from datetime import date
+from datetime import date, timedelta
 import win32event
 
 RUNNING = win32service.SERVICE_RUNNING
@@ -38,7 +38,7 @@ def main():
 	
 	parser = optparse.OptionParser('\n\nAuthor: Xenofon Vassilakopoulos (@xvass) \n\n\
 	[-] Usage: \n\n\
-	vseutil.exe  [options] \n\n\
+		vseutil.exe  [options] \n\n\
 	[!] Use vseutil.exe --hlp to see options and registry values to use\n\n')
 	
 	
@@ -151,9 +151,14 @@ def wnet_connect(host, username, password):
 				win32wnet.WNetCancelConnection2(unc, 0, 0)
 				return wnet_connect(host, username, password)
 			raise err
-def DATdate():
+		
+# DAT release date
+def DATdate(datver,current_value):
+	print datver
+	print current_value
 	today = date.today()
-	return str(today).replace("-","")
+	d = today - timedelta(days=1)
+	return str(d).replace("-","")
 
 def copy_file(DAT2val,ip,user,password,sourcefile,destfile,outfile):
 	semaphore = threading.BoundedSemaphore()
@@ -170,9 +175,9 @@ def copy_file(DAT2val,ip,user,password,sourcefile,destfile,outfile):
 			log_to_file('[*] file' + sourcefile + ' copied to C:\Program Files\Common Files\McAfee\%s' % destfile,outfile)
 	except IOError, e:
 		if e.errno == 22:   				
-			print Fore.WHITE + '[*] file did not copied to C:\Program Files\Common Files\McAfee\%s.' % destfile
+			print Fore.WHITE + '[x] file did not copied to C:\Program Files\Common Files\McAfee\%s.' % destfile
 			if (outfile != None):
-				log_to_file('[*] file did not copied to C:\Program Files\Common Files\McAfee\%s.' % destfile,outfile)
+				log_to_file('[x] file did not copied to C:\Program Files\Common Files\McAfee\%s.' % destfile,outfile)
 	finally:
 		semaphore.release()	
 		return
@@ -246,9 +251,9 @@ def registry_values(username,upass,value,sourcefile,destfile,c,outfile):
 		DAT = None
 		val = None
 		arch = None
-		print '[*] check registry values, source and destination'
+		print '[!] check registry values, source and destination'
 		if (outfile != None):
-			log_to_file('[*] check registry values, source and destination',outfile)
+			log_to_file('[!] check registry values, source and destination',outfile)
 			
 	return (val,arch,DAT2val,valnum,DAT)
 
@@ -265,6 +270,23 @@ def string_convert(val,sourcefile):
 	valnum = int(valsplit[0])
 	return (DAT2val,valnum,DAT)
 
+def checkServices(ip):
+	semaphore = threading.BoundedSemaphore()
+	semaphore.acquire()
+	status1 = svcStatus( "McShield", unicode(ip))
+	status2 = svcStatus( "McAfeeFramework", unicode(ip))
+	if status1 == STOPPED and status2 != STOPPED:
+		arg="win32service.SERVICE_ALL_ACCESS"	
+		svcStart( "McShield",arg, unicode(ip))
+	elif status1 != STOPPED and status2 == STOPPED:
+		arg="win32service.SERVICE_ALL_ACCESS"
+		svcStart( "McAfeeFramework",arg, unicode(ip))
+	elif status1 == STOPPED and status2 == STOPPED:
+		arg="win32service.SERVICE_ALL_ACCESS"
+		svcStart( "McAfeeFramework",arg, unicode(ip))
+		svcStart( "McShield",arg, unicode(ip))
+	semaphore.release()	
+	
 # This function updates DAT files inside the Engine file. It requires McShield and McAfeeFramework to stop and after the files copied then start.
 def update_vse(DAT,ip,DAT2val,valnum,username,upass,sourcefile,destfile,outfile):
 	semaphore = threading.BoundedSemaphore()
@@ -330,7 +352,7 @@ def update_vse(DAT,ip,DAT2val,valnum,username,upass,sourcefile,destfile,outfile)
 def update_registry(status1,status2,state_value,arch,outfile,c,value,DAT2val):
 	semaphore = threading.BoundedSemaphore()
 	semaphore.acquire()
-	today = DATdate()
+	today = DATdate(DAT2val,value)
 	if status1 != STOPPED and status2 != STOPPED and state_value == "passed":									
 		if(arch == 'x86'):
 			print "[*] updating registry.."
@@ -357,9 +379,9 @@ def update_registry(status1,status2,state_value,arch,outfile,c,value,DAT2val):
 		if (outfile != None):
 			log_to_file("[*] new current %s " % (value) + "is %s \n\n" % (val),outfile)
 	elif state_value == "not_passed":
-		print "[*] Registry cannot be updated. Please try again..\n"
+		print "[x] Registry cannot be updated. Please try again..\n"
 		if (outfile != None):
-			log_to_file("[*] Registry cannot be updated. Please try again..\n",outfile)
+			log_to_file("[x] Registry cannot be updated. Please try again..\n",outfile)
 	semaphore.release()
 
 def changeDATversion(DAT,ip,DAT2val,valnum,username,upass,sourcefile,destfile,outfile,arch,c,value,val,level):
@@ -375,15 +397,18 @@ def changeDATversion(DAT,ip,DAT2val,valnum,username,upass,sourcefile,destfile,ou
 		elif DAT2val == valnum or (DAT2val < valnum and level==None):
 			print Fore.WHITE + "[*] current %s " % (value) + "is " + Fore.YELLOW +  "%s " % (val)
 			if (DAT2val < valnum):
-				print Fore.WHITE + "[*] You are trying to install a lower DAT version..Use option '-d down' to downgrade.."
+				print Fore.WHITE + "[!] You are trying to install a lower DAT version..Use option '-d down' to downgrade.."
 			print Fore.WHITE + "[*] Exiting..."
 			if (outfile != None):
 				log_to_file("[*] current %s " % (value) + "is %s" % (val),outfile)
 				log_to_file("[*] Exiting...",outfile)
 	except:
-		print Fore.RED + "[*] Check if DAT version you are trying to install exists.."
+		print Fore.RED + "[!] Check if DAT version you are trying to install exists.."
+		print Fore.WHITE + "[*] Exiting..."
 		if (outfile != None):
-			log_to_file("[*] Check if DAT version you are trying to install exists..",outfile)
+			log_to_file("[!] Check if DAT version you are trying to install exists..",outfile)
+			log_to_file("[*] Exiting...",outfile)
+		checkServices(ip)
 	semaphore.release()
 	return
 
@@ -408,15 +433,16 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile,out
 					except:
 						print Fore.RED + "[*] Cannot access services..check permissions"
 						print Fore.WHITE + "[*] Exiting..."
+						checkServices(ip)
 						continue
 			else:
-				print "[*] Not connected to host with IP address %s" % ip + " Probably the host is down or user is logged off"
+				print "[x] Not connected to host with IP address %s" % ip + " Probably the host is down or user is logged off"
 				if (outfile != None):
-					log_to_file("[*] Not connected to IP address %s" % ip + " Probably the host is down or user is logged off",outfile)
+					log_to_file("[x] Not connected to IP address %s" % ip + " Probably the host is down or user is logged off",outfile)
 		except win32service.error, (msg):
-			print "[*] Error starting service: %s" % msg
+			print "[x] Error starting service: %s" % msg
 			if (outfile != None):
-				log_to_file("[*] Error starting service: %s" % msg,outfile)
+				log_to_file("[x] Error starting service: %s" % msg,outfile)
 			continue
 				
 if __name__ == '__main__':
