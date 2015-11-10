@@ -158,34 +158,34 @@ def lendian(seq):
 		T,S = sequence.split('x')
 	except:
 		S=sequence
-	K=0
+	count=0
 	t=list();
 	for _ in S:
-		K=K+2
-		I=S[:K:]
-		ST=I[::-K]
-		t.append(ST)
-	K=1
+		count=count+2
+		I=S[:count:]
+		Seq=I[::-count]
+		t.append(Seq)
+	count=1
 	e=list();
 	
 	for _ in S:
-		G=S[:K:]
-		SG=G[::-K]
-		K=K+2
+		G=S[:count:]
+		SG=G[::-count]
+		count=count+2
 		e.append(SG)
 	
 	no = len(S)/2
 	TT = t[0:no]
 	EE = e[0:no]			
-	foo = [ x+y for x,y in zip(EE,TT)]
-	f = foo[::-1]
-	ss = sep.join(f)			
-	sf = ''.join(('"',sep,ss,'"'))
-	sk=sf.split("-")
-	skk=len(sk)/2
-	day=sk[2]
-	month = sk[3]
-	year = sk[skk:][2] + sk[skk:][1]
+	ftime = [ x+y for x,y in zip(EE,TT)]
+	f = ftime[::-1]
+	seperator = sep.join(f)			
+	sepdate = ''.join(('"',sep,seperator,'"'))
+	fdate = sepdate.split("-")
+	devdate=len(fdate)/2
+	day = fdate[2]
+	month = fdate[3]
+	year = fdate[devdate:][2] + fdate[devdate:][1]
 	curdate =  year + "-" + month + "-" + day
 	curd = datetime.strptime(curdate, '%Y-%m-%d').date()
 	return curd
