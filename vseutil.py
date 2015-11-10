@@ -24,7 +24,7 @@ import win32api
 import win32con
 import win32service
 import win32serviceutil
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 import win32event
 
 RUNNING = win32service.SERVICE_RUNNING
@@ -88,36 +88,38 @@ def log_to_file(message,outfile):
 
 def helpinfo():
 	print '\n\n\
-	[*] Options:\n\n\
-	-c 		:- use this option to specify IP address as well as range of addresses using cidr\n\
-	--sf 		:- use this option to specify the source file that will be copied to target machine\n\
-	--df 		:- use this option to specify the destination that the file will be copied\n\
-	-r 		:- use this option to specify the registry value you want to review\n\
-	-u 		:- use this option to specify username\n\
-	-p 		:- use this option to specify password\n\
-	-s 		:- use this option to specify the first IP address to check\n\
-	-t 		:- use this option to specify the last IP address to check\n\
-	--out 		:- use this option to save the output into a log file --> e.g. "--out vse.log" or vse.csv\n\
-	-d	 	:- use this option if you want to downgrade the DAT version\n\n\
-	[*] Registry Values:\n\n\
-	- DATVersion\n\
-	- Version\n\
-	- DatInstallDate\n\
-	- HotFixVersions\n\
-	- Uninstall Command\n\
-	- EngineVersion\n\
-	- DatDate\n\
-	- EngineInstallDate\n\
-	- Install Path\n\
-	- Installs CMA\n\
-	- Plugin Flag\n\
-	- Plugin Path\n\
-	- Software ID\n\
-	- McTrayAboutBoxDisplay\n\
-	- Enforce Flag\n\
-	- CLSID\n\
-	- Language\n\
-	- Product Name\n'
+	[-] Usage: \n\n\
+		vseutil.exe  [options] \n\n\
+	[-] Options:\n\n\
+		-c 		:- use this option to specify IP address as well as range of addresses using cidr\n\
+		--sf 		:- use this option to specify the source file that will be copied to target machine\n\
+		--df 		:- use this option to specify the destination that the file will be copied\n\
+		-r 		:- use this option to specify the registry value you want to review\n\
+		-u 		:- use this option to specify username\n\
+		-p 		:- use this option to specify password\n\
+		-s 		:- use this option to specify the first IP address to check\n\
+		-t 		:- use this option to specify the last IP address to check\n\
+		--out 		:- use this option to save the output into a log file --> e.g. "--out vse.log" or vse.csv\n\
+		-d	 	:- use this option if you want to downgrade the DAT version\n\n\
+	[-] Registry Values:\n\n\
+		- DATVersion\n\
+		- Version\n\
+		- DatInstallDate\n\
+		- HotFixVersions\n\
+		- Uninstall Command\n\
+		- EngineVersion\n\
+		- DatDate\n\
+		- EngineInstallDate\n\
+		- Install Path\n\
+		- Installs CMA\n\
+		- Plugin Flag\n\
+		- Plugin Path\n\
+		- Software ID\n\
+		- McTrayAboutBoxDisplay\n\
+		- Enforce Flag\n\
+		- CLSID\n\
+		- Language\n\
+		- Product Name\n'
 		
 def svcStatus( svc_name, machine=None):
 		return win32serviceutil.QueryServiceStatus( svc_name, machine)[1]
@@ -149,19 +151,61 @@ def wnet_connect(host, username, password):
 				return wnet_connect(host, username, password)
 			raise err
 		
-# DAT release date
-def DATdate(datver,current_value):
-	print datver
-	print current_value
-	today = date.today()
-	d = today - timedelta(days=1)
+def lendian(seq):
+	sequence="0x" + str(seq) + "0x"
+	sep="-"
+	try:
+		T,S = sequence.split('x')
+	except:
+		S=sequence
+	K=0
+	t=list();
+	for _ in S:
+		K=K+2
+		I=S[:K:]
+		ST=I[::-K]
+		t.append(ST)
+	K=1
+	e=list();
+	
+	for _ in S:
+		G=S[:K:]
+		SG=G[::-K]
+		K=K+2
+		e.append(SG)
+	
+	no = len(S)/2
+	TT = t[0:no]
+	EE = e[0:no]			
+	foo = [ x+y for x,y in zip(EE,TT)]
+	f = foo[::-1]
+	ss = sep.join(f)			
+	sf = ''.join(('"',sep,ss,'"'))
+	sk=sf.split("-")
+	skk=len(sk)/2
+	day=sk[2]
+	month = sk[3]
+	year = sk[skk:][2] + sk[skk:][1]
+	curdate =  year + "-" + month + "-" + day
+	curd = datetime.strptime(curdate, '%Y-%m-%d').date()
+	return curd
+
+# DAT release date. McAfee releases the DATs one day before
+def DatReleaseDate(datver,current_value,date_release):
+	current=str(current_value).split(".")[0]
+	ver = int(current)-int(datver)
+	if int(current) > int(datver):		 
+		date_r = lendian(date_release)
+		d = date_r - timedelta(days=ver)
+	else:
+		date_r = lendian(date_release)
+		d = date_r - timedelta(days=1+ver)
 	return str(d).replace("-","")
 
 def copy_file(DAT2val,ip,user,password,sourcefile,destfile,outfile):
 	semaphore = threading.BoundedSemaphore()
 	semaphore.acquire()
 	wnet_connect(ip, user, password)
-	
 	try:
 		shutil.copy2(sourcefile,'\\\\' + str(ip) + '\\' + str(destfile) + '\\')
 		print Fore.WHITE +"[*] DAT "+ "latest version " + Fore.YELLOW + "%s.0000 " % DAT2val + Fore.WHITE + " uploded..."
@@ -228,7 +272,7 @@ def registry_values(username,upass,value,sourcefile,destfile,c,outfile):
 		else:
 			res,val = c.GetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
 		DAT2val,valnum,DAT = string_convert(val,sourcefile)
-			
+		
 	elif(value != None and sourcefile == None and destfile == None and username != None and upass != None):
 		DAT2val = None
 		valnum = None
@@ -283,7 +327,8 @@ def checkServices(ip):
 		svcStart( "McShield",arg, unicode(ip))
 	semaphore.release()	
 	
-# This function updates DAT files inside the Engine file. It requires McShield and McAfeeFramework to stop and after the files copied then start.
+# This function updates DAT files inside the C:\Program Files\Common Files\McAfee\Engine file. It requires McShield and McAfeeFramework to stop. 
+# After the files has been copied,start services again.
 def update_vse(DAT,ip,DAT2val,valnum,username,upass,sourcefile,destfile,outfile):
 	semaphore = threading.BoundedSemaphore()
 	semaphore.acquire()
@@ -345,17 +390,18 @@ def update_vse(DAT,ip,DAT2val,valnum,username,upass,sourcefile,destfile,outfile)
 	return (status1,status2,state_value)
 
 #This function updates registry values only when Engine folder has been updated 
-def update_registry(status1,status2,state_value,arch,outfile,c,value,DAT2val):
+def update_registry(status1,status2,state_value,arch,outfile,c,value,DAT2val,current_val):
 	semaphore = threading.BoundedSemaphore()
 	semaphore.acquire()
-	today = DATdate(DAT2val,value)
 	if status1 != STOPPED and status2 != STOPPED and state_value == "passed":									
 		if(arch == 'x86'):
 			print "[*] updating registry.."
 			if (outfile != None):
 				log_to_file("[*] updating registry..",outfile)
+			dd,date_release = c.GetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName="DatDate")
+			DATrelease = DatReleaseDate(DAT2val,current_val,date_release)
 			result, = c.SetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName=r"SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value,sValue=str(DAT2val) + '.0000')
-			dateres, = c.SetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName=r"SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName='DatDate',sValue=today)
+			dateres, = c.SetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName=r"SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName='DatDate',sValue=DATrelease)
 			res,val = c.GetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
 			print "[*] registry updated successfully"
 			if (outfile != None):
@@ -364,8 +410,10 @@ def update_registry(status1,status2,state_value,arch,outfile,c,value,DAT2val):
 			print "[*] updating registry.."
 			if (outfile != None):
 				log_to_file("[*] updating registry..",outfile)
+			dd,date_release = c.GetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName="DatDate")
+			DATrelease = DatReleaseDate(DAT2val,current_val,date_release)
 			result, = c.SetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName=r"SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value,sValue=str(DAT2val) + '.0000')
-			dateres, = c.SetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName=r"SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName='DatDate',sValue=today)
+			dateres, = c.SetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName=r"SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName='DatDate',sValue=DATrelease)
 			res,val = c.GetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
 			print "[*] registry updated successfully"
 			if (outfile != None):
@@ -379,6 +427,7 @@ def update_registry(status1,status2,state_value,arch,outfile,c,value,DAT2val):
 		if (outfile != None):
 			log_to_file("[x] Registry cannot be updated. Please try again..\n",outfile)
 	semaphore.release()
+	return
 
 def changeDATversion(DAT,ip,DAT2val,valnum,username,upass,sourcefile,destfile,outfile,arch,c,value,val,level):
 	semaphore = threading.BoundedSemaphore()
@@ -386,14 +435,14 @@ def changeDATversion(DAT,ip,DAT2val,valnum,username,upass,sourcefile,destfile,ou
 	try:
 		if DAT2val != valnum and level=="down":
 			status1,status2,state_value = update_vse(DAT,ip,DAT2val,valnum,username,upass,sourcefile,destfile,outfile)
-			update_registry(status1,status2,state_value,arch,outfile,c,value,DAT2val)
+			update_registry(status1,status2,state_value,arch,outfile,c,value,DAT2val,val)
 		elif DAT2val != valnum and level == None and DAT2val > valnum:
 			status1,status2,state_value = update_vse(DAT,ip,DAT2val,valnum,username,upass,sourcefile,destfile,outfile)
-			update_registry(status1,status2,state_value,arch,outfile,c,value,DAT2val)
+			update_registry(status1,status2,state_value,arch,outfile,c,value,DAT2val,val)
 		elif DAT2val == valnum or (DAT2val < valnum and level==None):
 			print Fore.WHITE + "[*] current %s " % (value) + "is " + Fore.YELLOW +  "%s " % (val)
 			if (DAT2val < valnum):
-				print Fore.WHITE + "[!] You are trying to install a lower DAT version..Use option '-d' to downgrade version.."
+				print Fore.WHITE + "[!] You are trying to install a lower DAT version..Use option '-d' to downgrade DAT version.."
 			print Fore.WHITE + "[*] Exiting..."
 			if (outfile != None):
 				log_to_file("[*] current %s " % (value) + "is %s" % (val),outfile)
