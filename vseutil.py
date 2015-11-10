@@ -151,9 +151,15 @@ def wnet_connect(host, username, password):
 				return wnet_connect(host, username, password)
 			raise err
 		
-def lendian(seq):
-	sequence="0x" + str(seq) + "0x"
-	sep="-"
+def lendian(daterelseq,datetimeinstseq):
+	if daterelseq != None and datetimeinstseq == None:
+		id=1
+		sequence="0x" + str(daterelseq) + "0x"
+		sep="-"
+	else:
+		id=2
+		sequence="0x" + str(datetimeinstseq) + "0x"
+		sep="-"
 	try:
 		T,S = sequence.split('x')
 	except:
@@ -181,24 +187,35 @@ def lendian(seq):
 	f = ftime[::-1]
 	seperator = sep.join(f)			
 	sepdate = ''.join(('"',sep,seperator,'"'))
-	fdate = sepdate.split("-")
-	devdate=len(fdate)/2
-	day = fdate[2]
-	month = fdate[3]
-	year = fdate[devdate:][2] + fdate[devdate:][1]
-	curdate =  year + "-" + month + "-" + day
-	curd = datetime.strptime(curdate, '%Y-%m-%d').date()
-	return curd
+	fdatetime = sepdate.split("-")
+	devdate=len(fdatetime)/2
+	if id==1:
+		day = fdatetime[2]
+		month = fdatetime[3]
+		year = fdatetime[devdate:][2] + fdatetime[devdate:][1]
+		curdate =  year + "-" + month + "-" + day
+		curd = datetime.strptime(curdate, '%Y-%m-%d').date()
+		return curd
+	else:
+		return fdatetime[4] + fdatetime[3] + fdatetime[2]
+		
+	
+
+#installation DAT date. This must be the same time the DAT is scheduled to be installed every day 
+def installDatDate(dateseq,datetimeseq):
+	datetime = lendian(None, datetimeseq)
+	date = dateseq + datetime
+	return date
 
 # DAT release date. McAfee releases the DATs one day before
 def DatReleaseDate(datver,current_value,date_release):
 	current=str(current_value).split(".")[0]
 	ver = int(current)-int(datver)
 	if int(current) > int(datver):		 
-		date_r = lendian(date_release)
+		date_r = lendian(date_release,None)
 		d = date_r - timedelta(days=ver)
 	else:
-		date_r = lendian(date_release)
+		date_r = lendian(date_release,None)
 		d = date_r - timedelta(days=1+ver)
 	return str(d).replace("-","")
 
@@ -398,10 +415,13 @@ def update_registry(status1,status2,state_value,arch,outfile,c,value,DAT2val,cur
 			print "[*] updating registry.."
 			if (outfile != None):
 				log_to_file("[*] updating registry..",outfile)
-			dd,date_release = c.GetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName="DatDate")
+			datRelease,date_release = c.GetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName="DatDate")
+			datInst,date_install = c.GetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName="DatInstallDate")
 			DATrelease = DatReleaseDate(DAT2val,current_val,date_release)
+			DATinstall = installDatDate(DATrelease,date_install)
 			result, = c.SetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName=r"SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value,sValue=str(DAT2val) + '.0000')
 			dateres, = c.SetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName=r"SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName='DatDate',sValue=DATrelease)
+			dateinstalledres, = c.SetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName=r"SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName='DatInstallDate',sValue=DATinstall)
 			res,val = c.GetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
 			print "[*] registry updated successfully"
 			if (outfile != None):
@@ -410,10 +430,13 @@ def update_registry(status1,status2,state_value,arch,outfile,c,value,DAT2val,cur
 			print "[*] updating registry.."
 			if (outfile != None):
 				log_to_file("[*] updating registry..",outfile)
-			dd,date_release = c.GetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName="DatDate")
+			datRelease,date_release = c.GetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName="DatDate")
+			datInst,date_install = c.GetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName="DatInstallDate")
 			DATrelease = DatReleaseDate(DAT2val,current_val,date_release)
+			DATinstall = installDatDate(DATrelease,date_install)
 			result, = c.SetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName=r"SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value,sValue=str(DAT2val) + '.0000')
 			dateres, = c.SetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName=r"SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName='DatDate',sValue=DATrelease)
+			dateinstalledres, = c.SetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName=r"SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName='DatInstallDate',sValue=DATinstall)
 			res,val = c.GetStringValue(hDefKey=win32con.HKEY_LOCAL_MACHINE,sSubKeyName="SOFTWARE\Wow6432Node\Network Associates\ePolicy Orchestrator\Application Plugins\VIRUSCAN8800",sValueName=value)
 			print "[*] registry updated successfully"
 			if (outfile != None):
