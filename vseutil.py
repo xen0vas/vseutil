@@ -153,11 +153,11 @@ def wnet_connect(host, username, password):
 		
 def lendian(daterelseq,datetimeinstseq):
 	if daterelseq != None and datetimeinstseq == None:
-		id=1
+		resid=1
 		sequence="0x" + str(daterelseq) + "0x"
 		sep="-"
-	else:
-		id=2
+	elif daterelseq == None and datetimeinstseq != None:
+		resid=2
 		sequence="0x" + str(datetimeinstseq) + "0x"
 		sep="-"
 	try:
@@ -189,7 +189,7 @@ def lendian(daterelseq,datetimeinstseq):
 	sepdate = ''.join(('"',sep,seperator,'"'))
 	fdatetime = sepdate.split("-")
 	devdate=len(fdatetime)/2
-	if id==1:
+	if resid==1:
 		day = fdatetime[2]
 		month = fdatetime[3]
 		year = fdatetime[devdate:][2] + fdatetime[devdate:][1]
@@ -210,13 +210,9 @@ def installDatDate(dateseq,datetimeseq):
 # DAT release date. McAfee releases the DATs one day before
 def DatReleaseDate(datver,current_value,date_release):
 	current=str(current_value).split(".")[0]
-	ver = int(current)-int(datver)
-	if int(current) > int(datver):		 
-		date_r = lendian(date_release,None)
-		d = date_r - timedelta(days=ver)
-	else:
-		date_r = lendian(date_release,None)
-		d = date_r - timedelta(days=1+ver)
+	ver = int(current)-int(datver) 
+	date_r = lendian(date_release,None)
+	d = date_r - timedelta(days=ver)
 	return str(d).replace("-","")
 
 def copy_file(DAT2val,ip,user,password,sourcefile,destfile,outfile):
