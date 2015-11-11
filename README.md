@@ -2,8 +2,8 @@
 
 vseutil tool performs the following
 
-- Scan networks and single machines and reads McAfee VSE 8.8.x windows registry values
-- Copy latest DAT file to target machine and executes the DAT in order to keep VSE 8.8.x antivirus updated
+- Scan networks and single machines and reads as well as updates McAfee VSE 8.8.x windows registry values
+- Copy latest DAT files to target machine in order to keep VSE 8.8.x antivirus updated
 - Runs on 32bit as well as 64bit Windows OS
 - Works only with VSE 8.8.x (future versions of vseutil will include every version of VSE)
 
@@ -17,7 +17,7 @@ https://kc.mcafee.com/corporate/index?page=content&id=KB51679
 
 ### Who need this
 
-everyone who want to keep VSE antivirus signatures updated on endpoints when ePO agent does not communicating correctly.
+everyone who want to keep VSE antivirus signatures updated on endpoints when McAfee agent does not communicating correctly with McAfee ePO.
 
 ### Prerequisites
 
