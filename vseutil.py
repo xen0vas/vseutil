@@ -1,10 +1,4 @@
 
-#################################################
-# Author: Xenofon Vassilakopoulos		#
-# This tool has being developed in order 	#
-# to help security engineers to automate VSE DAT#
-# updates to endpoints without using ePO	#
-#################################################
 from _winreg import *
 import optparse
 import os
@@ -510,5 +504,11 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile,out
 			continue
 				
 if __name__ == '__main__':
-	main()
-	
+	try:
+		main()
+	except KeyboardInterrupt:
+		pass
+	finally:
+		sys.exit()
+		
+		
