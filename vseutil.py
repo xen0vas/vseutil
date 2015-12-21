@@ -504,11 +504,7 @@ def connectwmi(fromh,toh,username,upass,value,cidr_hosts,sourcefile,destfile,out
 			continue
 				
 if __name__ == '__main__':
-	try:
 		main()
-	except KeyboardInterrupt:
-		pass
-	finally:
-		sys.exit()
+
 		
 		
