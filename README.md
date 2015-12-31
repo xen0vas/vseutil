@@ -7,7 +7,7 @@ vseutil tool performs the following
 - upgrade as well as downgrade DAT files on endpoints
 - Runs on 32bit as well as 64bit Windows OS
 - Works only with VSE 8.8.x (future versions of vseutil will include every version of VSE)
-- keep log files on demand for every action performed from the tool 
+- keep log files on demand for every action performed by the tool 
 
 The vseutil script developed based on the following article which describes the steps to update VSE 8.8.x DAT files on endpoints machines manually
 
