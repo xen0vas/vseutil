@@ -1,4 +1,4 @@
-##
+
 from _winreg import *
 import optparse
 import os
