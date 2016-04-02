@@ -138,5 +138,4 @@ As shown at the previous image this tool can run only when no service protection
 
 ### Execution example
 
-![execution](https://cloud.githubusercontent.com/assets/12726776/10912348/bd72d760-8251-11e5-937b-d6c66e5b5652.PNG)
-
+![execution](https://cloud.githubusercontent.com/assets/12726776/14225546/d1265234-f8ce-11e5-8ad2-b58eedc9ca3f.PNG)
