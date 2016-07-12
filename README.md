@@ -7,7 +7,7 @@ vseutil tool performs the following
 - copy latest DAT files to target machine in order to keep VSE 8.8.x antivirus updated
 - upgrade as well as downgrade DAT files on endpoint machines
 - works only with VSE 8.8.x (future versions of vseutil will include every version of VSE)
-- keep log files on demand for every action performed by the tool 
+- keep log files for every action performed by the tool 
 
 The vseutil script developed based on the following article which describes the steps to manually update VSE 8.8.x DAT files on endpoints machines 
 
