@@ -2,10 +2,11 @@
 
 vseutil tool performs the following
 
-- Scan networks and single machines, read and update registry values (epolicy orchestrator)
-- Copy latest DAT files to target machine in order to keep VSE 8.8.x antivirus updated
+- scan networks and single machines
+- read and update registry values (epolicy orchestrator)
+- copy latest DAT files to target machine in order to keep VSE 8.8.x antivirus updated
 - upgrade as well as downgrade DAT files on endpoint machines
-- Works only with VSE 8.8.x (future versions of vseutil will include every version of VSE)
+- works only with VSE 8.8.x (future versions of vseutil will include every version of VSE)
 - keep log files on demand for every action performed by the tool 
 
 The vseutil script developed based on the following article which describes the steps to manually update VSE 8.8.x DAT files on endpoints machines 
