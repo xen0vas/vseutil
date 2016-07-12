@@ -2,14 +2,14 @@
 
 vseutil tool performs the following
 
-- Scan networks and single machines and reads as well as updates McAfee VSE 8.8.x windows registry values (epolicy orchestrator section)
+- Scan networks and single machines, read and update registry values updates (epolicy orchestrator)
 - Copy latest DAT files to target machine in order to keep VSE 8.8.x antivirus updated
-- upgrade as well as downgrade DAT files on endpoints
+- upgrade as well as downgrade DAT files on endpoint machines
 - Runs on 32bit as well as 64bit Windows OS
 - Works only with VSE 8.8.x (future versions of vseutil will include every version of VSE)
 - keep log files on demand for every action performed by the tool 
 
-The vseutil script developed based on the following article which describes the steps to update VSE 8.8.x DAT files on endpoints machines manually
+The vseutil script developed based on the following article which describes the steps to manually update VSE 8.8.x DAT files on endpoints machines 
 
 https://kc.mcafee.com/corporate/index?page=content&id=KB51679
 
