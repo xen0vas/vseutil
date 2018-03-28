@@ -1,4 +1,20 @@
-#####
+
+
+#######################################################
+
+message = """
+ _    _______ ______      __  _ __
+| |  / / ___// ____/_  __/ /_(_) /
+| | / /\__ \/ __/ / / / / __/ / /
+| |/ /___/ / /___/ /_/ / /_/ / /
+|___//____/_____/\__,_/\__/_/_/
+
+VSEutl - a tool used to upgrade or downgrade signature dats on McAfee VSE 
+""".format(__version__)
+
+
+#######################################################
+
 from _winreg import *
 import optparse
 import os
@@ -30,6 +46,7 @@ init()
 
 def main():
 	
+	print message
 	parser = optparse.OptionParser('\n\nAuthor: Xenofon Vassilakopoulos (@xvass) \n\n\
 	[-] Usage: \n\n\
 		vseutil.exe  [options] \n\n\
