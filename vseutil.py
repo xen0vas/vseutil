@@ -9,7 +9,7 @@ message = """
 | |/ /___/ / /___/ /_/ / /_/ / /
 |___//____/_____/\__,_/\__/_/_/
 
-VSEutl - a tool used to upgrade or downgrade signature dats on McAfee VSE 
+VSEutil - a tool used to upgrade or downgrade signature dats on McAfee VSE 
 """.format(__version__)
 
 
