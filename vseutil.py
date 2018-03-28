@@ -1,6 +1,4 @@
 
-
-
 __version__ = "1.1"
 
 #######################################################
@@ -13,6 +11,7 @@ message = """
 |___//____/_____/\__,_/\__/_/_/
 
 VSEutil - a tool used to upgrade or downgrade signature dats on McAfee VSE 
+Ver. {}
 """.format(__version__)
 
 
