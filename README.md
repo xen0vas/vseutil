@@ -19,10 +19,11 @@ vseutil runs on 32bit as well as 64bit Windows OS
 
 ![reg](https://cloud.githubusercontent.com/assets/12726776/10712132/7ff04d56-7a99-11e5-8d5b-4effd8ace466.PNG)
 
-### important notice
+### important note
 
-if you are using python 2.7.x in 64bit Windows you will need to download the relative python extensions in order for this tool to run. 
-Visit the following URL to download the extensiond https://github.com/mhammond/pywin32/releases
+if you are using python 2.7.x in 64bit Windows you will need to download the relative python windows extensions in order for this tool to run.
+
+- Visit the following URL to download the latest extensions https://github.com/mhammond/pywin32/releases
 
 ### Who need this
 
